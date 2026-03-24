@@ -8,9 +8,14 @@ import 'package:locked_in/features/contacts/presentation/screens/contacts_screen
 import 'package:locked_in/features/create_lock/presentation/screens/create_lock_screen.dart';
 import 'package:locked_in/features/emergency_unlock/presentation/screens/emergency_unlock_screen.dart';
 import 'package:locked_in/features/home/presentation/screens/home_screen.dart';
+import 'package:locked_in/features/settings/presentation/screens/change_password_screen.dart';
+import 'package:locked_in/features/settings/presentation/screens/edit_profile_screen.dart';
 import 'package:locked_in/features/settings/presentation/screens/settings_screen.dart';
+import 'package:locked_in/features/settings/presentation/screens/subscription_history_screen.dart';
 import 'package:locked_in/features/splash/presentation/screens/splash_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:locked_in/features/home/domain/entities/locked_app_entity.dart';
+import 'package:locked_in/features/home/presentation/screens/app_locked_detail_screen.dart';
 
 import 'package:locked_in/features/onboarding/presentation/providers/onboarding_provider.dart';
 import 'package:locked_in/features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -19,10 +24,13 @@ import 'package:locked_in/features/auth/presentation/screens/forgot_password_scr
 import 'package:locked_in/features/auth/presentation/screens/otp_verification_screen.dart';
 import 'package:locked_in/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:locked_in/features/auth/presentation/screens/user_verify_screen.dart';
+import 'package:locked_in/features/emergency_unlock/presentation/screens/request_code_screen.dart';
+import 'package:locked_in/features/emergency_unlock/presentation/screens/request_sent_screen.dart';
 import 'package:locked_in/features/settings/presentation/screens/about_us_screen.dart';
 import 'package:locked_in/features/settings/presentation/screens/terms_condition_screen.dart';
 import 'package:locked_in/features/settings/presentation/screens/privacy_policy_screen.dart';
 import 'package:locked_in/shared/widgets/common_bottom_nav_bar.dart';
+import 'package:locked_in/features/settings/presentation/screens/subscription_screen.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -134,11 +142,6 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const HomeScreen(),
           ),
           GoRoute(
-            path: RoutePaths.createLock,
-            name: RouteNames.createLock,
-            builder: (context, state) => const CreateLockScreen(),
-          ),
-          GoRoute(
             path: RoutePaths.contacts,
             name: RouteNames.contacts,
             builder: (context, state) => const ContactsScreen(),
@@ -149,6 +152,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const SettingsScreen(),
           ),
         ],
+      ),
+      GoRoute(
+        path: RoutePaths.createLock,
+        name: RouteNames.createLock,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const CreateLockScreen(),
       ),
       GoRoute(
         path: RoutePaths.aboutUs,
@@ -170,6 +179,51 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: RouteNames.emergencyUnlock,
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const EmergencyUnlockScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.subscription,
+        name: RouteNames.subscription,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const SubscriptionScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.appLockedDetail,
+        name: RouteNames.appLockedDetail,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) {
+          final app = state.extra as LockedAppEntity;
+          return AppLockedDetailScreen(app: app);
+        },
+      ),
+      GoRoute(
+        path: RoutePaths.requestSent,
+        name: RouteNames.requestSent,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const RequestSentScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.requestCode,
+        name: RouteNames.requestCode,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const RequestCodeScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.editProfile,
+        name: RouteNames.editProfile,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.changePassword,
+        name: RouteNames.changePassword,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const ChangePasswordScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.subscriptionHistory,
+        name: RouteNames.subscriptionHistory,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const SubscriptionHistoryScreen(),
       ),
     ],
   );

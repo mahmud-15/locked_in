@@ -11,6 +11,13 @@ class RouteNames {
   static const String forgotPassword = 'forgot-password';
   static const String verifyOtp = 'verify-otp';
   static const String resetPassword = 'reset-password';
+  static const String subscription = 'subscription';
+  static const String appLockedDetail = 'app-locked-detail';
+  static const String requestSent = 'request-sent';
+  static const String requestCode = 'request-code';
+  static const String editProfile = 'edit-profile';
+  static const String changePassword = 'change-password';
+  static const String subscriptionHistory = 'subscription-history';
 }
 
 class RoutePaths {
@@ -30,4 +37,11 @@ class RoutePaths {
   static const String aboutUs = '/about-us';
   static const String termsCondition = '/terms-condition';
   static const String privacyPolicy = '/privacy-policy';
+  static const String subscription = '/subscription';
+  static const String appLockedDetail = '/app-locked-detail';
+  static const String requestSent = '/request-sent';
+  static const String requestCode = '/request-code';
+  static const String editProfile = '/edit-profile';
+  static const String changePassword = '/change-password';
+  static const String subscriptionHistory = '/subscription-history';
 }

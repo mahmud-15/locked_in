@@ -19,4 +19,16 @@ class AppStrings {
   // Common
   static const String continueText = 'Continue';
   static const String skip = 'Skip';
+
+  // Home
+  static const String todayLockedTime = "Today's locked time";
+  static const String greatProgress = 'Great progress!';
+  static const String lessScreenTime = '32% less screen time than yesterday';
+  static const String createNewLock = 'Create new lock';
+  static const String createNewLockSubtitle = 'Block distracting app';
+  static const String activeLocks = 'Active Locks';
+  static const String subscriptions = 'Subscriptions';
+  static const String home = 'Home';
+  static const String contacts = 'Contacts';
+  static const String settings = 'Settings';
 }

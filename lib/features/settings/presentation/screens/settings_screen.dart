@@ -41,9 +41,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             // Profile Section
             _buildSectionHeader('Profile'),
-            _buildSettingTile(title: 'Edit Profile', onTap: () {}),
-            _buildSettingTile(title: 'Change Password', onTap: () {}),
-            _buildSettingTile(title: 'Subscription History', onTap: () {}),
+            _buildSettingTile(
+              title: 'Edit Profile',
+              onTap: () => context.pushNamed(RouteNames.editProfile),
+            ),
+            _buildSettingTile(
+              title: 'Change Password',
+              onTap: () => context.pushNamed(RouteNames.changePassword),
+            ),
+            _buildSettingTile(
+              title: 'Subscription History',
+              onTap: () => context.pushNamed(RouteNames.subscriptionHistory),
+            ),
 
             SizedBox(height: 16.h),
 
