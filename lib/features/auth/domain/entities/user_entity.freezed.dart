@@ -20,6 +20,7 @@ mixin _$UserEntity {
   String get email => throw _privateConstructorUsedError;
   String? get name => throw _privateConstructorUsedError;
   String? get photoUrl => throw _privateConstructorUsedError;
+  String? get accessToken => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $UserEntityCopyWith<UserEntity> get copyWith =>
@@ -32,7 +33,12 @@ abstract class $UserEntityCopyWith<$Res> {
           UserEntity value, $Res Function(UserEntity) then) =
       _$UserEntityCopyWithImpl<$Res, UserEntity>;
   @useResult
-  $Res call({String id, String email, String? name, String? photoUrl});
+  $Res call(
+      {String id,
+      String email,
+      String? name,
+      String? photoUrl,
+      String? accessToken});
 }
 
 /// @nodoc
@@ -52,6 +58,7 @@ class _$UserEntityCopyWithImpl<$Res, $Val extends UserEntity>
     Object? email = null,
     Object? name = freezed,
     Object? photoUrl = freezed,
+    Object? accessToken = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -70,6 +77,10 @@ class _$UserEntityCopyWithImpl<$Res, $Val extends UserEntity>
           ? _value.photoUrl
           : photoUrl // ignore: cast_nullable_to_non_nullable
               as String?,
+      accessToken: freezed == accessToken
+          ? _value.accessToken
+          : accessToken // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -82,7 +93,12 @@ abstract class _$$UserEntityImplCopyWith<$Res>
       __$$UserEntityImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String id, String email, String? name, String? photoUrl});
+  $Res call(
+      {String id,
+      String email,
+      String? name,
+      String? photoUrl,
+      String? accessToken});
 }
 
 /// @nodoc
@@ -100,6 +116,7 @@ class __$$UserEntityImplCopyWithImpl<$Res>
     Object? email = null,
     Object? name = freezed,
     Object? photoUrl = freezed,
+    Object? accessToken = freezed,
   }) {
     return _then(_$UserEntityImpl(
       id: null == id
@@ -118,6 +135,10 @@ class __$$UserEntityImplCopyWithImpl<$Res>
           ? _value.photoUrl
           : photoUrl // ignore: cast_nullable_to_non_nullable
               as String?,
+      accessToken: freezed == accessToken
+          ? _value.accessToken
+          : accessToken // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -126,7 +147,11 @@ class __$$UserEntityImplCopyWithImpl<$Res>
 
 class _$UserEntityImpl implements _UserEntity {
   const _$UserEntityImpl(
-      {required this.id, required this.email, this.name, this.photoUrl});
+      {required this.id,
+      required this.email,
+      this.name,
+      this.photoUrl,
+      this.accessToken});
 
   @override
   final String id;
@@ -136,10 +161,12 @@ class _$UserEntityImpl implements _UserEntity {
   final String? name;
   @override
   final String? photoUrl;
+  @override
+  final String? accessToken;
 
   @override
   String toString() {
-    return 'UserEntity(id: $id, email: $email, name: $name, photoUrl: $photoUrl)';
+    return 'UserEntity(id: $id, email: $email, name: $name, photoUrl: $photoUrl, accessToken: $accessToken)';
   }
 
   @override
@@ -151,11 +178,14 @@ class _$UserEntityImpl implements _UserEntity {
             (identical(other.email, email) || other.email == email) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.photoUrl, photoUrl) ||
-                other.photoUrl == photoUrl));
+                other.photoUrl == photoUrl) &&
+            (identical(other.accessToken, accessToken) ||
+                other.accessToken == accessToken));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, email, name, photoUrl);
+  int get hashCode =>
+      Object.hash(runtimeType, id, email, name, photoUrl, accessToken);
 
   @JsonKey(ignore: true)
   @override
@@ -169,7 +199,8 @@ abstract class _UserEntity implements UserEntity {
       {required final String id,
       required final String email,
       final String? name,
-      final String? photoUrl}) = _$UserEntityImpl;
+      final String? photoUrl,
+      final String? accessToken}) = _$UserEntityImpl;
 
   @override
   String get id;
@@ -179,6 +210,8 @@ abstract class _UserEntity implements UserEntity {
   String? get name;
   @override
   String? get photoUrl;
+  @override
+  String? get accessToken;
   @override
   @JsonKey(ignore: true)
   _$$UserEntityImplCopyWith<_$UserEntityImpl> get copyWith =>

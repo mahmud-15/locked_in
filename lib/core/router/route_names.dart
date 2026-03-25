@@ -5,6 +5,7 @@ class RouteNames {
   static const String home = 'home';
   static const String createLock = 'create-lock';
   static const String contacts = 'contacts';
+  static const String tracking = 'tracking';
   static const String emergencyUnlock = 'emergency-unlock';
   static const String settings = 'settings';
   static const String onboarding = 'onboarding';
@@ -27,6 +28,7 @@ class RoutePaths {
   static const String home = '/home';
   static const String createLock = '/create-lock';
   static const String contacts = '/contacts';
+  static const String tracking = '/tracking';
   static const String emergencyUnlock = '/emergency-unlock';
   static const String settings = '/settings';
   static const String onboarding = '/onboarding';

@@ -9,9 +9,12 @@ import 'package:locked_in/shared/widgets/common_text.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:locked_in/features/auth/presentation/providers/auth_ui_provider.dart';
+import 'package:locked_in/features/auth/presentation/providers/register_provider.dart';
+import 'package:locked_in/features/auth/presentation/providers/verify_email_provider.dart';
 
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:locked_in/core/utils/validators.dart';
+import 'package:locked_in/core/utils/snackbar_utils.dart';
 
 class UserVerifyScreen extends ConsumerStatefulWidget {
   const UserVerifyScreen({super.key});
@@ -40,6 +43,22 @@ class _UserVerifyScreenState extends ConsumerState<UserVerifyScreen> {
   @override
   Widget build(BuildContext context) {
     final timerSeconds = ref.watch(otpTimerProvider);
+    final verifyState = ref.watch(verifyEmailProvider);
+    final registerState = ref.read(registerProvider);
+
+    ref.listen(verifyEmailProvider, (previous, next) {
+      if (next.errorMessage != null &&
+          next.errorMessage != previous?.errorMessage) {
+        AppSnackBar.showError(context, next.errorMessage!);
+      } else if (next.resendMessage != null &&
+          next.resendMessage != previous?.resendMessage) {
+        AppSnackBar.showSuccess(context, next.resendMessage!);
+        _otpController.clear();
+        ref.read(otpTimerProvider.notifier).resetTimer();
+      } else if (next.isSuccess) {
+        context.go(RoutePaths.home);
+      }
+    });
 
     return AuthLayout(
       title: 'Verify OTP',
@@ -92,11 +111,24 @@ class _UserVerifyScreenState extends ConsumerState<UserVerifyScreen> {
             ),
             SizedBox(height: 48.h),
             CommonButton(
-              text: 'Get OTP',
+              text: 'Verify OTP',
+              isLoading: verifyState.isLoading,
               onPressed: () {
                 if (_formKey.currentState?.validate() ?? false) {
-                  // After registration verification, go to home or success
-                  context.go(RoutePaths.home);
+                  final email = registerState.registeredEmail;
+                  if (email != null && email.isNotEmpty) {
+                    ref
+                        .read(verifyEmailProvider.notifier)
+                        .verify(email: email, oneTimeCode: _otpController.text);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Email not found. Please register again.",
+                        ),
+                      ),
+                    );
+                  }
                 }
               },
             ),
@@ -110,21 +142,41 @@ class _UserVerifyScreenState extends ConsumerState<UserVerifyScreen> {
                   color: AppColors.white800,
                 ),
                 SizedBox(height: 8.h),
-                GestureDetector(
-                  onTap: () {
-                    _otpController.clear();
-                    ref.read(otpTimerProvider.notifier).resetTimer();
-                  },
-                  child: const Text(
-                    'Resend',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w500,
-                      decoration: TextDecoration.underline,
-                      decorationColor: AppColors.primary,
-                    ),
-                  ),
-                ),
+                verifyState.isResending
+                    ? SizedBox(
+                        height: 20.h,
+                        width: 20.h,
+                        child: const CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
+                      )
+                    : GestureDetector(
+                        onTap: () {
+                          final email = registerState.registeredEmail;
+                          if (email != null && email.isNotEmpty) {
+                            ref
+                                .read(verifyEmailProvider.notifier)
+                                .resendOtp(email);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  "Email not found. Please register again.",
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        child: const Text(
+                          'Resend',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w500,
+                            decoration: TextDecoration.underline,
+                            decorationColor: AppColors.primary,
+                          ),
+                        ),
+                      ),
               ],
             ),
           ],

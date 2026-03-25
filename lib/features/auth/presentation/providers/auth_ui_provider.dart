@@ -24,6 +24,10 @@ class OTPTimerNotifier extends StateNotifier<int> {
     _timer?.cancel();
     state = _initialDuration;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
       if (state > 0) {
         state = state - 1;
       } else {
@@ -43,6 +47,7 @@ class OTPTimerNotifier extends StateNotifier<int> {
   }
 }
 
-final otpTimerProvider = StateNotifierProvider<OTPTimerNotifier, int>((ref) {
-  return OTPTimerNotifier();
-});
+final otpTimerProvider =
+    StateNotifierProvider.autoDispose<OTPTimerNotifier, int>((ref) {
+      return OTPTimerNotifier();
+    });

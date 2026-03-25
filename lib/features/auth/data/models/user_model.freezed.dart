@@ -20,11 +20,13 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$UserModel {
-  String get id => throw _privateConstructorUsedError;
-  String get email => throw _privateConstructorUsedError;
+  @JsonKey(name: '_id')
+  String? get id => throw _privateConstructorUsedError;
+  String? get email => throw _privateConstructorUsedError;
   String? get name => throw _privateConstructorUsedError;
-  @JsonKey(name: 'photo_url')
+  @JsonKey(name: 'image')
   String? get photoUrl => throw _privateConstructorUsedError;
+  String? get accessToken => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -38,10 +40,11 @@ abstract class $UserModelCopyWith<$Res> {
       _$UserModelCopyWithImpl<$Res, UserModel>;
   @useResult
   $Res call(
-      {String id,
-      String email,
+      {@JsonKey(name: '_id') String? id,
+      String? email,
       String? name,
-      @JsonKey(name: 'photo_url') String? photoUrl});
+      @JsonKey(name: 'image') String? photoUrl,
+      String? accessToken});
 }
 
 /// @nodoc
@@ -57,20 +60,21 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
-    Object? email = null,
+    Object? id = freezed,
+    Object? email = freezed,
     Object? name = freezed,
     Object? photoUrl = freezed,
+    Object? accessToken = freezed,
   }) {
     return _then(_value.copyWith(
-      id: null == id
+      id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: null == email
+              as String?,
+      email: freezed == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -78,6 +82,10 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
       photoUrl: freezed == photoUrl
           ? _value.photoUrl
           : photoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
+      accessToken: freezed == accessToken
+          ? _value.accessToken
+          : accessToken // ignore: cast_nullable_to_non_nullable
               as String?,
     ) as $Val);
   }
@@ -92,10 +100,11 @@ abstract class _$$UserModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String id,
-      String email,
+      {@JsonKey(name: '_id') String? id,
+      String? email,
       String? name,
-      @JsonKey(name: 'photo_url') String? photoUrl});
+      @JsonKey(name: 'image') String? photoUrl,
+      String? accessToken});
 }
 
 /// @nodoc
@@ -109,20 +118,21 @@ class __$$UserModelImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
-    Object? email = null,
+    Object? id = freezed,
+    Object? email = freezed,
     Object? name = freezed,
     Object? photoUrl = freezed,
+    Object? accessToken = freezed,
   }) {
     return _then(_$UserModelImpl(
-      id: null == id
+      id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: null == email
+              as String?,
+      email: freezed == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -130,6 +140,10 @@ class __$$UserModelImplCopyWithImpl<$Res>
       photoUrl: freezed == photoUrl
           ? _value.photoUrl
           : photoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
+      accessToken: freezed == accessToken
+          ? _value.accessToken
+          : accessToken // ignore: cast_nullable_to_non_nullable
               as String?,
     ));
   }
@@ -139,28 +153,32 @@ class __$$UserModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$UserModelImpl extends _UserModel {
   const _$UserModelImpl(
-      {required this.id,
-      required this.email,
+      {@JsonKey(name: '_id') this.id,
+      this.email,
       this.name,
-      @JsonKey(name: 'photo_url') this.photoUrl})
+      @JsonKey(name: 'image') this.photoUrl,
+      this.accessToken})
       : super._();
 
   factory _$UserModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserModelImplFromJson(json);
 
   @override
-  final String id;
+  @JsonKey(name: '_id')
+  final String? id;
   @override
-  final String email;
+  final String? email;
   @override
   final String? name;
   @override
-  @JsonKey(name: 'photo_url')
+  @JsonKey(name: 'image')
   final String? photoUrl;
+  @override
+  final String? accessToken;
 
   @override
   String toString() {
-    return 'UserModel(id: $id, email: $email, name: $name, photoUrl: $photoUrl)';
+    return 'UserModel(id: $id, email: $email, name: $name, photoUrl: $photoUrl, accessToken: $accessToken)';
   }
 
   @override
@@ -172,12 +190,15 @@ class _$UserModelImpl extends _UserModel {
             (identical(other.email, email) || other.email == email) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.photoUrl, photoUrl) ||
-                other.photoUrl == photoUrl));
+                other.photoUrl == photoUrl) &&
+            (identical(other.accessToken, accessToken) ||
+                other.accessToken == accessToken));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, email, name, photoUrl);
+  int get hashCode =>
+      Object.hash(runtimeType, id, email, name, photoUrl, accessToken);
 
   @JsonKey(ignore: true)
   @override
@@ -195,24 +216,28 @@ class _$UserModelImpl extends _UserModel {
 
 abstract class _UserModel extends UserModel {
   const factory _UserModel(
-      {required final String id,
-      required final String email,
+      {@JsonKey(name: '_id') final String? id,
+      final String? email,
       final String? name,
-      @JsonKey(name: 'photo_url') final String? photoUrl}) = _$UserModelImpl;
+      @JsonKey(name: 'image') final String? photoUrl,
+      final String? accessToken}) = _$UserModelImpl;
   const _UserModel._() : super._();
 
   factory _UserModel.fromJson(Map<String, dynamic> json) =
       _$UserModelImpl.fromJson;
 
   @override
-  String get id;
+  @JsonKey(name: '_id')
+  String? get id;
   @override
-  String get email;
+  String? get email;
   @override
   String? get name;
   @override
-  @JsonKey(name: 'photo_url')
+  @JsonKey(name: 'image')
   String? get photoUrl;
+  @override
+  String? get accessToken;
   @override
   @JsonKey(ignore: true)
   _$$UserModelImplCopyWith<_$UserModelImpl> get copyWith =>

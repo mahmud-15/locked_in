@@ -7,6 +7,7 @@ import 'package:locked_in/features/auth/presentation/screens/register_screen.dar
 import 'package:locked_in/features/contacts/presentation/screens/contacts_screen.dart';
 import 'package:locked_in/features/create_lock/presentation/screens/create_lock_screen.dart';
 import 'package:locked_in/features/emergency_unlock/presentation/screens/emergency_unlock_screen.dart';
+import 'package:locked_in/features/tracking/presentation/screens/tracking_screen.dart';
 import 'package:locked_in/features/home/presentation/screens/home_screen.dart';
 import 'package:locked_in/features/settings/presentation/screens/change_password_screen.dart';
 import 'package:locked_in/features/settings/presentation/screens/edit_profile_screen.dart';
@@ -147,6 +148,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const ContactsScreen(),
           ),
           GoRoute(
+            path: RoutePaths.tracking,
+            name: RouteNames.tracking,
+            builder: (context, state) => const TrackingScreen(),
+          ),
+          GoRoute(
             path: RoutePaths.settings,
             name: RouteNames.settings,
             builder: (context, state) => const SettingsScreen(),
@@ -265,7 +271,8 @@ class MainShell extends StatelessWidget {
     final String location = GoRouterState.of(context).matchedLocation;
     if (location.startsWith(RoutePaths.home)) return 0;
     if (location.startsWith(RoutePaths.contacts)) return 1;
-    if (location.startsWith(RoutePaths.settings)) return 2;
+    if (location.startsWith(RoutePaths.tracking)) return 2;
+    if (location.startsWith(RoutePaths.settings)) return 3;
     return 0;
   }
 }

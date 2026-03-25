@@ -9,5 +9,6 @@ class UserEntity with _$UserEntity {
     required String email,
     String? name,
     String? photoUrl,
+    String? accessToken,
   }) = _UserEntity;
 }

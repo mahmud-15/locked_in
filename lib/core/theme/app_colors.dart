@@ -9,6 +9,8 @@ class AppColors {
   static const Color textSecondary = Color(0xFF757575);
   static const Color white800 = Color(0xFF818181);
   static const Color indicatorInactive = Color(0xFFE0E0E0);
+  static const Color error = Color(0xFFE53935);
+  static const Color success = Color(0xFF43A047);
 
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,

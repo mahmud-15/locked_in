@@ -26,6 +26,12 @@ class CommonBottomNavBar extends StatelessWidget {
         route: RoutePaths.contacts,
       ),
       _NavItem(
+        title: 'Tracking',
+        unselectedIcon: Icons.bar_chart_outlined,
+        selectedIcon: Icons.bar_chart,
+        route: RoutePaths.tracking,
+      ),
+      _NavItem(
         title: 'Settings',
         unselectedIcon: Icons.settings_outlined,
         selectedIcon: Icons.settings,

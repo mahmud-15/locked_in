@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:locked_in/core/router/route_names.dart';
 import 'package:locked_in/core/theme/app_colors.dart';
+import 'package:locked_in/features/auth/presentation/providers/auth_provider.dart';
 import 'package:locked_in/shared/widgets/common_text.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool lockStarted = true;
   bool lockEnded = true;
 
@@ -86,11 +88,109 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () => context.push(RoutePaths.privacyPolicy),
             ),
 
+            SizedBox(height: 16.h),
+
+            // Logout
+            _buildSettingTile(
+              title: 'Log Out',
+              textColor: const Color(0xFFFF564B),
+              onTap: () => _showLogoutDialog(context),
+            ),
+
             // Extra space at bottom to ensure scrolling past bottom nav
             SizedBox(height: 40.h),
           ],
         ),
       ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r), // Match exact radius
+          ),
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 32.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CommonText(
+                  'Log Out',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF373737),
+                ),
+                SizedBox(height: 16.h),
+                const CommonText(
+                  'Are you sure you want to Log out this\nAccount ?',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF676E79),
+                  textAlign: TextAlign.center,
+                  height: 1.5,
+                ),
+                SizedBox(height: 32.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(dialogContext),
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
+                          side: BorderSide(color: Colors.grey.withOpacity(0.5)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                        ),
+                        child: const CommonText(
+                          'Cancel',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF6B7280),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 16.w),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          Navigator.pop(dialogContext); // Close dialog
+                          await ref.read(authProvider.notifier).logout();
+                          if (context.mounted) {
+                            context.goNamed(RouteNames.login);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
+                          backgroundColor: const Color(
+                            0xFFFF564B,
+                          ), // Coral specific to design
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                        ),
+                        child: const CommonText(
+                          'Confirm',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -109,6 +209,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSettingTile({
     required String title,
     required VoidCallback onTap,
+    Color? textColor,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -126,13 +227,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: CommonText(
                 title,
                 fontSize: 16,
-                fontWeight: FontWeight.w400,
-                color: AppColors.textSecondary, // Muted greyish text from image
+                fontWeight: textColor != null
+                    ? FontWeight.w500
+                    : FontWeight.w400,
+                color: textColor ?? AppColors.textSecondary,
               ),
             ),
             Icon(
               Icons.chevron_right,
-              color: const Color(0xFF9CA3AF),
+              color: textColor ?? const Color(0xFF9CA3AF),
               size: 20.sp,
             ),
           ],

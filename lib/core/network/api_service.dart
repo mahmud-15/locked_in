@@ -1,0 +1,183 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:dio/dio.dart';
+import 'package:mime/mime.dart';
+import 'package:locked_in/core/constants/api_endpoints.dart';
+import 'package:locked_in/core/constants/app_strings.dart';
+import 'package:locked_in/core/network/api_log.dart';
+import 'package:locked_in/core/network/local_storage.dart';
+import 'package:locked_in/core/network/api_response_model.dart';
+
+class ApiService {
+  static final Dio _dio = _getMyDio();
+
+  /// ========== [ HTTP METHODS ] ========== ///
+  static Future<ApiResponseModel> post(
+    String url, {
+    dynamic body,
+    Map<String, String>? header,
+  }) => _request(url, "POST", body: body, header: header);
+
+  static Future<ApiResponseModel> get(
+    String url, {
+    Map<String, String>? header,
+  }) => _request(url, "GET", header: header);
+
+  static Future<ApiResponseModel> put(
+    String url, {
+    dynamic body,
+    Map<String, String>? header,
+  }) => _request(url, "PUT", body: body, header: header);
+
+  static Future<ApiResponseModel> patch(
+    String url, {
+    dynamic body,
+    Map<String, String>? header,
+  }) => _request(url, "PATCH", body: body, header: header);
+
+  static Future<ApiResponseModel> delete(
+    String url, {
+    dynamic body,
+    Map<String, String>? header,
+  }) => _request(url, "DELETE", body: body, header: header);
+
+  static Future<ApiResponseModel> multipart(
+    String url, {
+    Map<String, String> header = const {},
+    Map<String, String> body = const {},
+    String method = "POST",
+    String imageName = 'image',
+    String? imagePath,
+  }) async {
+    final Map<String, String> headers = Map<String, String>.from(header);
+    final Map<String, String> fields = Map<String, String>.from(body);
+    FormData formData = FormData();
+    if (imagePath != null && imagePath.isNotEmpty) {
+      File file = File(imagePath);
+      String extension = file.path.split('.').last.toLowerCase();
+      String? mimeType = lookupMimeType(imagePath);
+
+      formData.files.add(
+        MapEntry(
+          imageName,
+          await MultipartFile.fromFile(
+            imagePath,
+            filename: "$imageName.$extension",
+            contentType: mimeType != null
+                ? DioMediaType.parse(mimeType)
+                : DioMediaType.parse("image/jpeg"),
+          ),
+        ),
+      );
+    }
+
+    fields.forEach((key, value) {
+      formData.fields.add(MapEntry(key, value));
+    });
+
+    headers['Content-Type'] = "multipart/form-data";
+
+    return _request(url, method, body: formData, header: headers);
+  }
+
+  static Future<ApiResponseModel> postFormData(
+    String url,
+    FormData formData, {
+    Map<String, String>? header,
+  }) async {
+    final headers = header ?? {};
+    headers['Content-Type'] = "multipart/form-data";
+    return _request(url, "POST", body: formData, header: headers);
+  }
+
+  /// ========== [ API REQUEST HANDLER ] ========== ///
+  static Future<ApiResponseModel> _request(
+    String url,
+    String method, {
+    dynamic body,
+    Map<String, String>? header,
+  }) async {
+    try {
+      final response = await _dio.request(
+        url,
+        data: body,
+        options: Options(method: method, headers: header),
+      );
+      return _handleResponse(response);
+    } catch (e) {
+      return _handleError(e);
+    }
+  }
+
+  static ApiResponseModel _handleResponse(Response response) {
+    if (response.statusCode == 201) {
+      return ApiResponseModel(200, response.data);
+    }
+    return ApiResponseModel(response.statusCode, response.data);
+  }
+
+  static ApiResponseModel _handleError(dynamic error) {
+    try {
+      return _handleDioException(error as DioException);
+    } catch (e) {
+      return ApiResponseModel(500, {});
+    }
+  }
+
+  static ApiResponseModel _handleDioException(DioException error) {
+    switch (error.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.receiveTimeout:
+      case DioExceptionType.sendTimeout:
+        return ApiResponseModel(408, {"message": AppStrings.requestTimeOut});
+
+      case DioExceptionType.badResponse:
+        return ApiResponseModel(
+          error.response?.statusCode,
+          error.response?.data,
+        );
+
+      case DioExceptionType.connectionError:
+        return ApiResponseModel(503, {
+          "message": AppStrings.noInternetConnection,
+        });
+
+      default:
+        return ApiResponseModel(400, {});
+    }
+  }
+}
+
+/// ========== [ DIO INSTANCE WITH INTERCEPTORS ] ========== ///
+Dio _getMyDio() {
+  Dio dio = Dio();
+
+  dio.interceptors.add(apiLog());
+
+  dio.interceptors.add(
+    InterceptorsWrapper(
+      onRequest: (options, handler) {
+        options
+          ..headers["Authorization"] ??= "Bearer ${LocalStorage.token}"
+          ..headers["Content-Type"] ??= "application/json"
+          ..connectTimeout = const Duration(seconds: 30)
+          ..sendTimeout = const Duration(seconds: 30)
+          ..receiveDataWhenStatusError = true
+          ..responseType = ResponseType.json
+          ..receiveTimeout = const Duration(seconds: 30)
+          ..baseUrl = options.baseUrl.startsWith("http")
+              ? ""
+              : ApiEndpoints.baseUrl;
+        handler.next(options);
+      },
+      onResponse: (response, handler) {
+        handler.next(response);
+      },
+      onError: (error, handler) {
+        handler.next(error);
+      },
+    ),
+  );
+
+  return dio;
+}

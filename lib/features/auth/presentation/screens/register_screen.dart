@@ -9,8 +9,10 @@ import 'package:locked_in/shared/widgets/common_text_field.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:locked_in/features/auth/presentation/providers/auth_ui_provider.dart';
+import 'package:locked_in/features/auth/presentation/providers/register_provider.dart';
 
 import 'package:locked_in/core/utils/validators.dart';
+import 'package:locked_in/core/utils/snackbar_utils.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -36,6 +38,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final showPassword = ref.watch(registerPasswordVisibleProvider);
+    final registerState = ref.watch(registerProvider);
+
+    ref.listen(registerProvider, (previous, next) {
+      if (next.errorMessage != null &&
+          next.errorMessage != previous?.errorMessage) {
+        AppSnackBar.showError(context, next.errorMessage!);
+      } else if (next.isSuccess) {
+        context.push(RoutePaths.userVerify);
+      }
+    });
 
     return AuthLayout(
       title: 'Create an Account',
@@ -84,10 +96,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             SizedBox(height: 48.h),
             CommonButton(
               text: 'Continue',
+              isLoading: registerState.isLoading,
               onPressed: () {
                 if (_formKey.currentState?.validate() ?? false) {
-                  // TODO: Implement registration logic
-                  context.push(RoutePaths.userVerify);
+                  ref
+                      .read(registerProvider.notifier)
+                      .register(
+                        name: _nameController.text.trim(),
+                        email: _emailController.text.trim(),
+                        password: _passwordController.text.trim(),
+                      );
                 }
               },
             ),

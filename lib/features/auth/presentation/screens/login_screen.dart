@@ -9,9 +9,9 @@ import 'package:locked_in/shared/widgets/common_text_field.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:locked_in/features/auth/presentation/providers/auth_ui_provider.dart';
-
-import 'package:locked_in/features/auth/presentation/providers/auth_provider.dart';
 import 'package:locked_in/core/utils/validators.dart';
+import 'package:locked_in/core/utils/snackbar_utils.dart';
+import 'package:locked_in/features/auth/presentation/providers/login_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -35,6 +35,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final showPassword = ref.watch(loginPasswordVisibleProvider);
+    final loginState = ref.watch(loginProvider);
+
+    ref.listen(loginProvider, (previous, next) {
+      if (next.errorMessage != null &&
+          next.errorMessage != previous?.errorMessage) {
+        AppSnackBar.showError(context, next.errorMessage!);
+      }
+    });
 
     return AuthLayout(
       title: 'Sign in',
@@ -90,11 +98,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             SizedBox(height: 32.h),
             CommonButton(
               text: 'Sign In',
+              isLoading: loginState.isLoading,
               onPressed: () {
                 if (_formKey.currentState?.validate() ?? false) {
-                  // Update auth state to proceed past router guards
-                  ref.read(authProvider.notifier).login();
-                  // No need for context.go(RoutePaths.home) here as redirect handles it
+                  ref
+                      .read(loginProvider.notifier)
+                      .login(
+                        _emailController.text.trim(),
+                        _passwordController.text.trim(),
+                      );
                 }
               },
             ),

@@ -31,4 +31,14 @@ class AppStrings {
   static const String home = 'Home';
   static const String contacts = 'Contacts';
   static const String settings = 'Settings';
+
+  // API
+  static const String startServer =
+      "Could not connect to the server. Please try again later.";
+  static const String someThingWrong =
+      "Something went wrong. Please try again.";
+  static const String requestTimeOut =
+      "Request timeout. Please check your internet connection.";
+  static const String noInternetConnection =
+      "No internet connection. Please check your network.";
 }

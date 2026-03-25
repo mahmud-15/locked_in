@@ -7,10 +7,11 @@ part 'user_model.g.dart';
 @freezed
 class UserModel with _$UserModel {
   const factory UserModel({
-    required String id,
-    required String email,
+    @JsonKey(name: '_id') String? id,
+    String? email,
     String? name,
-    @JsonKey(name: 'photo_url') String? photoUrl,
+    @JsonKey(name: 'image') String? photoUrl,
+    String? accessToken,
   }) = _UserModel;
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
@@ -18,6 +19,11 @@ class UserModel with _$UserModel {
 
   const UserModel._();
 
-  UserEntity toEntity() =>
-      UserEntity(id: id, email: email, name: name, photoUrl: photoUrl);
+  UserEntity toEntity() => UserEntity(
+    id: id ?? '',
+    email: email ?? '',
+    name: name,
+    photoUrl: photoUrl,
+    accessToken: accessToken,
+  );
 }
