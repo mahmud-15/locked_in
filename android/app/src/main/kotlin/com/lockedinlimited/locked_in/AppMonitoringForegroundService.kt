@@ -1,4 +1,4 @@
-package com.example.locked_in
+package com.lockedinlimited.locked_in
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

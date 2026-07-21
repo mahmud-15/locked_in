@@ -16,13 +16,7 @@ class HomeAppBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: Row(
         children: [
-          _TitleSection(dateLabel: today),
-          const Spacer(),
-          GestureDetector(
-            onTap: () => context.goNamed(RouteNames.subscription),
-            child: _SubscriptionsPill(),
-          ),
-          const SizedBox(width: 10),
+          Expanded(child: _TitleSection(dateLabel: today)),
           _NotificationBell(),
         ],
       ),
@@ -44,52 +38,24 @@ class _TitleSection extends StatelessWidget {
             Text(
               AppStrings.appName,
               style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
                 color: AppColors.black,
+                letterSpacing: -0.5,
               ),
             ),
             SizedBox(width: 6),
-            Text('🔒', style: TextStyle(fontSize: 18)),
+            Text('🔒', style: TextStyle(fontSize: 20)),
           ],
         ),
         const SizedBox(height: 2),
         Text(
           dateLabel,
           style: const TextStyle(fontSize: 12, color: AppColors.gray),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
         ),
       ],
-    );
-  }
-}
-
-class _SubscriptionsPill extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.primary),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: const Row(
-        children: [
-          Icon(
-            Icons.workspace_premium_outlined,
-            size: 14,
-            color: AppColors.primary,
-          ),
-          SizedBox(width: 4),
-          Text(
-            AppStrings.subscriptions,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: AppColors.black,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -97,13 +63,15 @@ class _SubscriptionsPill extends StatelessWidget {
 class _NotificationBell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(6),
-
-      child: const Icon(
-        Icons.notifications_outlined,
-        size: 25,
-        color: AppColors.black,
+    return GestureDetector(
+      onTap: () => context.pushNamed(RouteNames.notifications),
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        child: const Icon(
+          Icons.notifications_outlined,
+          size: 25,
+          color: AppColors.black,
+        ),
       ),
     );
   }

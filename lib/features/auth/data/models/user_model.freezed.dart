@@ -27,6 +27,7 @@ mixin _$UserModel {
   @JsonKey(name: 'image')
   String? get photoUrl => throw _privateConstructorUsedError;
   String? get accessToken => throw _privateConstructorUsedError;
+  Map<String, dynamic>? get subscription => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -44,7 +45,8 @@ abstract class $UserModelCopyWith<$Res> {
       String? email,
       String? name,
       @JsonKey(name: 'image') String? photoUrl,
-      String? accessToken});
+      String? accessToken,
+      Map<String, dynamic>? subscription});
 }
 
 /// @nodoc
@@ -65,6 +67,7 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
     Object? name = freezed,
     Object? photoUrl = freezed,
     Object? accessToken = freezed,
+    Object? subscription = freezed,
   }) {
     return _then(_value.copyWith(
       id: freezed == id
@@ -87,6 +90,10 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
           ? _value.accessToken
           : accessToken // ignore: cast_nullable_to_non_nullable
               as String?,
+      subscription: freezed == subscription
+          ? _value.subscription
+          : subscription // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
     ) as $Val);
   }
 }
@@ -104,7 +111,8 @@ abstract class _$$UserModelImplCopyWith<$Res>
       String? email,
       String? name,
       @JsonKey(name: 'image') String? photoUrl,
-      String? accessToken});
+      String? accessToken,
+      Map<String, dynamic>? subscription});
 }
 
 /// @nodoc
@@ -123,6 +131,7 @@ class __$$UserModelImplCopyWithImpl<$Res>
     Object? name = freezed,
     Object? photoUrl = freezed,
     Object? accessToken = freezed,
+    Object? subscription = freezed,
   }) {
     return _then(_$UserModelImpl(
       id: freezed == id
@@ -145,6 +154,10 @@ class __$$UserModelImplCopyWithImpl<$Res>
           ? _value.accessToken
           : accessToken // ignore: cast_nullable_to_non_nullable
               as String?,
+      subscription: freezed == subscription
+          ? _value._subscription
+          : subscription // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
     ));
   }
 }
@@ -157,8 +170,10 @@ class _$UserModelImpl extends _UserModel {
       this.email,
       this.name,
       @JsonKey(name: 'image') this.photoUrl,
-      this.accessToken})
-      : super._();
+      this.accessToken,
+      final Map<String, dynamic>? subscription})
+      : _subscription = subscription,
+        super._();
 
   factory _$UserModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserModelImplFromJson(json);
@@ -175,10 +190,19 @@ class _$UserModelImpl extends _UserModel {
   final String? photoUrl;
   @override
   final String? accessToken;
+  final Map<String, dynamic>? _subscription;
+  @override
+  Map<String, dynamic>? get subscription {
+    final value = _subscription;
+    if (value == null) return null;
+    if (_subscription is EqualUnmodifiableMapView) return _subscription;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(value);
+  }
 
   @override
   String toString() {
-    return 'UserModel(id: $id, email: $email, name: $name, photoUrl: $photoUrl, accessToken: $accessToken)';
+    return 'UserModel(id: $id, email: $email, name: $name, photoUrl: $photoUrl, accessToken: $accessToken, subscription: $subscription)';
   }
 
   @override
@@ -192,13 +216,15 @@ class _$UserModelImpl extends _UserModel {
             (identical(other.photoUrl, photoUrl) ||
                 other.photoUrl == photoUrl) &&
             (identical(other.accessToken, accessToken) ||
-                other.accessToken == accessToken));
+                other.accessToken == accessToken) &&
+            const DeepCollectionEquality()
+                .equals(other._subscription, _subscription));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, email, name, photoUrl, accessToken);
+  int get hashCode => Object.hash(runtimeType, id, email, name, photoUrl,
+      accessToken, const DeepCollectionEquality().hash(_subscription));
 
   @JsonKey(ignore: true)
   @override
@@ -220,7 +246,8 @@ abstract class _UserModel extends UserModel {
       final String? email,
       final String? name,
       @JsonKey(name: 'image') final String? photoUrl,
-      final String? accessToken}) = _$UserModelImpl;
+      final String? accessToken,
+      final Map<String, dynamic>? subscription}) = _$UserModelImpl;
   const _UserModel._() : super._();
 
   factory _UserModel.fromJson(Map<String, dynamic> json) =
@@ -238,6 +265,8 @@ abstract class _UserModel extends UserModel {
   String? get photoUrl;
   @override
   String? get accessToken;
+  @override
+  Map<String, dynamic>? get subscription;
   @override
   @JsonKey(ignore: true)
   _$$UserModelImplCopyWith<_$UserModelImpl> get copyWith =>

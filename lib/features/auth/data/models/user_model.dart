@@ -12,6 +12,7 @@ class UserModel with _$UserModel {
     String? name,
     @JsonKey(name: 'image') String? photoUrl,
     String? accessToken,
+    Map<String, dynamic>? subscription,
   }) = _UserModel;
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
@@ -25,5 +26,6 @@ class UserModel with _$UserModel {
     name: name,
     photoUrl: photoUrl,
     accessToken: accessToken,
+    subscription: subscription,
   );
 }

@@ -11,6 +11,8 @@ class CommonTextField extends StatelessWidget {
   final TextEditingController? controller;
   final String? Function(String?)? validator;
   final TextInputType? keyboardType;
+  final bool readOnly;
+  final bool? enabled;
 
   const CommonTextField({
     super.key,
@@ -22,6 +24,8 @@ class CommonTextField extends StatelessWidget {
     this.controller,
     this.validator,
     this.keyboardType,
+    this.readOnly = false,
+    this.enabled,
   });
 
   @override
@@ -43,6 +47,13 @@ class CommonTextField extends StatelessWidget {
           obscureText: obscureText,
           validator: validator,
           keyboardType: keyboardType,
+          readOnly: readOnly,
+          enabled: enabled,
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w500,
+          ),
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: TextStyle(

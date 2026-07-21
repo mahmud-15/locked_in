@@ -9,6 +9,7 @@ class LockedAppModel extends LockedAppEntity {
     required super.iconKey,
     required super.lockUntil,
     super.iconBytes,
+    super.userId,
   });
 
   factory LockedAppModel.fromJson(Map<String, dynamic> json) => LockedAppModel(
@@ -19,6 +20,7 @@ class LockedAppModel extends LockedAppEntity {
     iconKey: json['icon_key'] as String,
     lockUntil: DateTime.parse(json['lock_until'] as String),
     iconBytes: json['icon_bytes'],
+    userId: json['userId'] as String?,
   );
 
   Map<String, dynamic> toJson() => {
@@ -29,5 +31,6 @@ class LockedAppModel extends LockedAppEntity {
     'icon_key': iconKey,
     'lock_until': lockUntil.toIso8601String(),
     'icon_bytes': iconBytes,
+    'userId': userId,
   };
 }

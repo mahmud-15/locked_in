@@ -21,6 +21,7 @@ mixin _$UserEntity {
   String? get name => throw _privateConstructorUsedError;
   String? get photoUrl => throw _privateConstructorUsedError;
   String? get accessToken => throw _privateConstructorUsedError;
+  Map<String, dynamic>? get subscription => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $UserEntityCopyWith<UserEntity> get copyWith =>
@@ -38,7 +39,8 @@ abstract class $UserEntityCopyWith<$Res> {
       String email,
       String? name,
       String? photoUrl,
-      String? accessToken});
+      String? accessToken,
+      Map<String, dynamic>? subscription});
 }
 
 /// @nodoc
@@ -59,6 +61,7 @@ class _$UserEntityCopyWithImpl<$Res, $Val extends UserEntity>
     Object? name = freezed,
     Object? photoUrl = freezed,
     Object? accessToken = freezed,
+    Object? subscription = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -81,6 +84,10 @@ class _$UserEntityCopyWithImpl<$Res, $Val extends UserEntity>
           ? _value.accessToken
           : accessToken // ignore: cast_nullable_to_non_nullable
               as String?,
+      subscription: freezed == subscription
+          ? _value.subscription
+          : subscription // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
     ) as $Val);
   }
 }
@@ -98,7 +105,8 @@ abstract class _$$UserEntityImplCopyWith<$Res>
       String email,
       String? name,
       String? photoUrl,
-      String? accessToken});
+      String? accessToken,
+      Map<String, dynamic>? subscription});
 }
 
 /// @nodoc
@@ -117,6 +125,7 @@ class __$$UserEntityImplCopyWithImpl<$Res>
     Object? name = freezed,
     Object? photoUrl = freezed,
     Object? accessToken = freezed,
+    Object? subscription = freezed,
   }) {
     return _then(_$UserEntityImpl(
       id: null == id
@@ -139,6 +148,10 @@ class __$$UserEntityImplCopyWithImpl<$Res>
           ? _value.accessToken
           : accessToken // ignore: cast_nullable_to_non_nullable
               as String?,
+      subscription: freezed == subscription
+          ? _value._subscription
+          : subscription // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
     ));
   }
 }
@@ -151,7 +164,9 @@ class _$UserEntityImpl implements _UserEntity {
       required this.email,
       this.name,
       this.photoUrl,
-      this.accessToken});
+      this.accessToken,
+      final Map<String, dynamic>? subscription})
+      : _subscription = subscription;
 
   @override
   final String id;
@@ -163,10 +178,19 @@ class _$UserEntityImpl implements _UserEntity {
   final String? photoUrl;
   @override
   final String? accessToken;
+  final Map<String, dynamic>? _subscription;
+  @override
+  Map<String, dynamic>? get subscription {
+    final value = _subscription;
+    if (value == null) return null;
+    if (_subscription is EqualUnmodifiableMapView) return _subscription;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(value);
+  }
 
   @override
   String toString() {
-    return 'UserEntity(id: $id, email: $email, name: $name, photoUrl: $photoUrl, accessToken: $accessToken)';
+    return 'UserEntity(id: $id, email: $email, name: $name, photoUrl: $photoUrl, accessToken: $accessToken, subscription: $subscription)';
   }
 
   @override
@@ -180,12 +204,14 @@ class _$UserEntityImpl implements _UserEntity {
             (identical(other.photoUrl, photoUrl) ||
                 other.photoUrl == photoUrl) &&
             (identical(other.accessToken, accessToken) ||
-                other.accessToken == accessToken));
+                other.accessToken == accessToken) &&
+            const DeepCollectionEquality()
+                .equals(other._subscription, _subscription));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, email, name, photoUrl, accessToken);
+  int get hashCode => Object.hash(runtimeType, id, email, name, photoUrl,
+      accessToken, const DeepCollectionEquality().hash(_subscription));
 
   @JsonKey(ignore: true)
   @override
@@ -200,7 +226,8 @@ abstract class _UserEntity implements UserEntity {
       required final String email,
       final String? name,
       final String? photoUrl,
-      final String? accessToken}) = _$UserEntityImpl;
+      final String? accessToken,
+      final Map<String, dynamic>? subscription}) = _$UserEntityImpl;
 
   @override
   String get id;
@@ -212,6 +239,8 @@ abstract class _UserEntity implements UserEntity {
   String? get photoUrl;
   @override
   String? get accessToken;
+  @override
+  Map<String, dynamic>? get subscription;
   @override
   @JsonKey(ignore: true)
   _$$UserEntityImplCopyWith<_$UserEntityImpl> get copyWith =>

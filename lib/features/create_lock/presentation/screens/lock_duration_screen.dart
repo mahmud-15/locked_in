@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,70 +14,125 @@ class LockDurationScreen extends ConsumerWidget {
 
   const LockDurationScreen({super.key, required this.selectedApps});
 
-  static final List<String> _durations = List.generate(48, (index) {
-    final minutes = (index + 1) * 30;
+  String _formatDurationValue(int minutes) {
+    if (minutes == 0) return '30 min'; // default minimum fallback
     final hours = minutes ~/ 60;
     final remainingMinutes = minutes % 60;
 
     if (hours == 0) return '$remainingMinutes min';
     if (remainingMinutes == 0) return '$hours hour${hours > 1 ? 's' : ''}';
     return '$hours h $remainingMinutes min';
-  });
+  }
 
   void _showDurationPicker(
     BuildContext context,
     WidgetRef ref,
     String appId,
-    int? currentDurationIndex,
+    int currentDurationMinutes,
   ) {
+    int tempDuration = currentDurationMinutes == 0
+        ? 30
+        : currentDurationMinutes;
+
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFF111111), // Deep premium dark background
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
         return Container(
-          padding: const EdgeInsets.symmetric(vertical: 20),
+          padding: const EdgeInsets.only(top: 12, bottom: 32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Select Duration',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF373737),
+              // Premium Drag Handle
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              const SizedBox(height: 10),
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: _durations.length,
-                  itemBuilder: (context, index) {
-                    final isSelected = currentDurationIndex == index;
-                    return ListTile(
-                      title: Text(
-                        _durations[index],
-                        textAlign: TextAlign.center,
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        splashFactory: NoSplash.splashFactory,
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(
+                        'Cancel',
                         style: TextStyle(
-                          color: isSelected
-                              ? const Color(0xFFFE5A4E)
-                              : const Color(0xFF373737),
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal,
+                          color: Color(0xFFA1A1AA), // Very subtle soft gray
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      onTap: () {
+                    ),
+                    const Text(
+                      'Lock Duration',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        splashFactory: NoSplash.splashFactory,
+                      ),
+                      onPressed: () {
+                        if (tempDuration < 30) {
+                          tempDuration = 30; // Minimum 30 minutes
+                        }
                         ref
                             .read(createLockProvider.notifier)
-                            .setDuration(appId, index);
+                            .setDuration(appId, tempDuration);
                         Navigator.pop(context);
                       },
-                    );
-                  },
+                      child: const Text(
+                        'Save',
+                        style: TextStyle(
+                          color: Color(0xFFFE5A4E),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 240,
+                child: CupertinoTheme(
+                  data: const CupertinoThemeData(
+                    brightness: Brightness.dark,
+                    textTheme: CupertinoTextThemeData(
+                      pickerTextStyle: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  child: CupertinoTimerPicker(
+                    mode: CupertinoTimerPickerMode.hm,
+                    initialTimerDuration: Duration(minutes: tempDuration),
+                    onTimerDurationChanged: (Duration newDuration) {
+                      tempDuration = newDuration.inMinutes;
+                    },
+                  ),
                 ),
               ),
             ],
@@ -130,12 +186,17 @@ class LockDurationScreen extends ConsumerWidget {
               itemCount: selectedApps.length,
               itemBuilder: (context, index) {
                 final app = selectedApps[index];
-                final durationIndex = state.selectedAppDurations[app.id] ?? 0;
+                final durationMinutes =
+                    state.selectedAppDurations[app.id] ?? 30; // 30 min default
                 return _AppDurationTile(
                   app: app,
-                  selectedDuration: _durations[durationIndex],
-                  onTap: () =>
-                      _showDurationPicker(context, ref, app.id, durationIndex),
+                  selectedDuration: _formatDurationValue(durationMinutes),
+                  onTap: () => _showDurationPicker(
+                    context,
+                    ref,
+                    app.id,
+                    durationMinutes,
+                  ),
                 );
               },
             ),
@@ -171,17 +232,18 @@ class _AppDurationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.08)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            spreadRadius: 2,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
@@ -190,8 +252,20 @@ class _AppDurationTile extends StatelessWidget {
         children: [
           Row(
             children: [
-              AppIconWidget(app: app),
-              const SizedBox(width: 12),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: AppIconWidget(app: app),
+              ),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,48 +273,82 @@ class _AppDurationTile extends StatelessWidget {
                     Text(
                       app.name,
                       style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1F2937),
+                        letterSpacing: -0.3,
                       ),
                     ),
+                    const SizedBox(height: 2),
                     Text(
                       app.category,
                       style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF9E9E9E),
+                        fontSize: 13,
+                        color: Color(0xFF6B7280),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.check_circle, color: Color(0xFFFE5A4E)),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFE5A4E),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 14),
+              ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           const Text(
-            'Duration',
-            style: TextStyle(fontSize: 12, color: Color(0xFF676E79)),
+            'Set Restriction Timer',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF4B5563),
+              letterSpacing: 0.2,
+            ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           GestureDetector(
             onTap: onTap,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+                color: const Color(0xFFFE5A4E).withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: const Color(0xFFFE5A4E).withValues(alpha: 0.2),
+                  width: 1.5,
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    selectedDuration,
-                    style: const TextStyle(fontSize: 14, color: Colors.black),
+                  Row(
+                    children: [
+                      const Icon(
+                        CupertinoIcons.timer,
+                        size: 20,
+                        color: Color(0xFFFE5A4E),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        selectedDuration,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFFFE5A4E),
+                        ),
+                      ),
+                    ],
                   ),
                   const Icon(
-                    Icons.keyboard_arrow_down,
-                    color: Color(0xFF676E79),
+                    Icons.unfold_more_rounded,
+                    color: Color(0xFFFE5A4E),
+                    size: 22,
                   ),
                 ],
               ),
@@ -261,34 +369,41 @@ class _BottomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
       decoration: const BoxDecoration(color: Colors.white),
-      child: SizedBox(
-        width: double.infinity,
-        height: 54,
-        child: ElevatedButton(
-          onPressed: isLoading ? null : onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFFE5A4E),
-            foregroundColor: Colors.white,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+          child: SizedBox(
+            width: double.infinity,
+            height: 54,
+            child: ElevatedButton(
+              onPressed: isLoading ? null : onPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFE5A4E),
+                disabledBackgroundColor: const Color(0xFFFE5A4E),
+                foregroundColor: Colors.white,
+                disabledForegroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: isLoading
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Text(
+                      'Continue',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
             ),
           ),
-          child: isLoading
-              ? const SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
-              : const Text(
-                  'Continue',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
         ),
       ),
     );

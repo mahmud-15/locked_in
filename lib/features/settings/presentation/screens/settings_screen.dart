@@ -34,7 +34,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             SizedBox(height: 4.h),
             const CommonText(
-              'Customize your experience',
+              'Manage your account',
               fontSize: 14,
               fontWeight: FontWeight.w400,
               color: AppColors.textSecondary,
@@ -44,12 +44,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             // Profile Section
             _buildSectionHeader('Profile'),
             _buildSettingTile(
-              title: 'Edit Profile',
+              title: 'Profile Details',
               onTap: () => context.pushNamed(RouteNames.editProfile),
             ),
             _buildSettingTile(
               title: 'Change Password',
               onTap: () => context.pushNamed(RouteNames.changePassword),
+            ),
+            _buildSettingTile(
+              title: 'Subscription',
+              onTap: () => context.pushNamed(RouteNames.subscription),
             ),
             _buildSettingTile(
               title: 'Subscription History',
@@ -128,7 +132,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 SizedBox(height: 16.h),
                 const CommonText(
-                  'Are you sure you want to Log out this\nAccount ?',
+                  'Are you sure you want to log out of\nthis account?',
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
                   color: Color(0xFF676E79),

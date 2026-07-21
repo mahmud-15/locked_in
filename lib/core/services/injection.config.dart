@@ -17,6 +17,8 @@ import '../../features/auth/data/datasources/auth_remote_data_source.dart'
 import '../../features/auth/data/repositories/auth_repository_impl.dart'
     as _i153;
 import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
+import '../../features/auth/domain/usecases/change_password_usecase.dart'
+    as _i788;
 import '../../features/auth/domain/usecases/login_usecase.dart' as _i188;
 import '../../features/auth/domain/usecases/register_usecase.dart' as _i941;
 import '../../features/auth/domain/usecases/resend_otp_usecase.dart' as _i613;
@@ -29,6 +31,25 @@ import '../../features/contacts/domain/repositories/contact_repository.dart'
     as _i873;
 import '../../features/contacts/domain/usecases/add_contact_usecase.dart'
     as _i834;
+import '../../features/contacts/domain/usecases/get_contacts_usecase.dart'
+    as _i1050;
+import '../../features/emergency_unlock/data/datasources/emergency_unlock_remote_data_source.dart'
+    as _i917;
+import '../../features/emergency_unlock/data/repositories/emergency_unlock_repository_impl.dart'
+    as _i451;
+import '../../features/emergency_unlock/domain/repositories/emergency_unlock_repository.dart'
+    as _i696;
+import '../../features/emergency_unlock/domain/usecases/request_otp_usecase.dart'
+    as _i766;
+import '../../features/emergency_unlock/domain/usecases/verify_otp_usecase.dart'
+    as _i564;
+import '../../features/settings/data/datasources/profile_remote_data_source.dart'
+    as _i830;
+import '../../features/settings/data/repositories/profile_repository_impl.dart'
+    as _i578;
+import '../../features/settings/domain/repositories/profile_repository.dart'
+    as _i931;
+import '../../features/settings/domain/usecases/profile_usecases.dart' as _i43;
 import '../network/dio_client.dart' as _i667;
 import 'hive_service.dart' as _i0;
 import 'storage_service.dart' as _i285;
@@ -50,24 +71,45 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i285.StorageService>(() => _i285.StorageService());
     gh.lazySingleton<_i971.ContactRemoteDataSource>(
         () => _i971.ContactRemoteDataSourceImpl());
+    gh.lazySingleton<_i830.ProfileRemoteDataSource>(
+        () => _i830.ProfileRemoteDataSourceImpl());
+    gh.lazySingleton<_i917.EmergencyUnlockRemoteDataSource>(
+        () => _i917.EmergencyUnlockRemoteDataSourceImpl());
     gh.lazySingleton<_i107.AuthRemoteDataSource>(
         () => _i107.AuthRemoteDataSourceImpl());
+    gh.lazySingleton<_i931.ProfileRepository>(
+        () => _i578.ProfileRepositoryImpl(gh<_i830.ProfileRemoteDataSource>()));
     gh.lazySingleton<_i873.ContactRepository>(
         () => _i929.ContactRepositoryImpl(gh<_i971.ContactRemoteDataSource>()));
     gh.lazySingleton<_i787.AuthRepository>(() => _i153.AuthRepositoryImpl(
           gh<_i107.AuthRemoteDataSource>(),
           gh<_i285.StorageService>(),
         ));
-    gh.factory<_i941.RegisterUseCase>(
-        () => _i941.RegisterUseCase(gh<_i787.AuthRepository>()));
-    gh.factory<_i30.VerifyEmailUseCase>(
-        () => _i30.VerifyEmailUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i613.ResendOtpUseCase>(
         () => _i613.ResendOtpUseCase(gh<_i787.AuthRepository>()));
+    gh.factory<_i941.RegisterUseCase>(
+        () => _i941.RegisterUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i188.LoginUseCase>(
         () => _i188.LoginUseCase(gh<_i787.AuthRepository>()));
+    gh.factory<_i788.ChangePasswordUseCase>(
+        () => _i788.ChangePasswordUseCase(gh<_i787.AuthRepository>()));
+    gh.factory<_i30.VerifyEmailUseCase>(
+        () => _i30.VerifyEmailUseCase(gh<_i787.AuthRepository>()));
+    gh.factory<_i1050.GetContactsUseCase>(
+        () => _i1050.GetContactsUseCase(gh<_i873.ContactRepository>()));
     gh.factory<_i834.AddContactUseCase>(
         () => _i834.AddContactUseCase(gh<_i873.ContactRepository>()));
+    gh.lazySingleton<_i696.EmergencyUnlockRepository>(() =>
+        _i451.EmergencyUnlockRepositoryImpl(
+            gh<_i917.EmergencyUnlockRemoteDataSource>()));
+    gh.factory<_i43.GetProfileUseCase>(
+        () => _i43.GetProfileUseCase(gh<_i931.ProfileRepository>()));
+    gh.factory<_i43.UpdateProfileUseCase>(
+        () => _i43.UpdateProfileUseCase(gh<_i931.ProfileRepository>()));
+    gh.factory<_i766.RequestOtpUseCase>(
+        () => _i766.RequestOtpUseCase(gh<_i696.EmergencyUnlockRepository>()));
+    gh.factory<_i564.VerifyOtpUseCase>(
+        () => _i564.VerifyOtpUseCase(gh<_i696.EmergencyUnlockRepository>()));
     return this;
   }
 }

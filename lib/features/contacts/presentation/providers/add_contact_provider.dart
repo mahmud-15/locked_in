@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:locked_in/core/services/injection.dart';
 import 'package:locked_in/features/contacts/domain/usecases/add_contact_usecase.dart';
+import 'package:locked_in/features/contacts/presentation/providers/contacts_provider.dart';
 
 class AddContactState {
   final bool isLoading;
@@ -28,8 +29,10 @@ class AddContactState {
 
 class AddContactNotifier extends StateNotifier<AddContactState> {
   final AddContactUseCase _addContactUseCase;
+  final Ref _ref;
 
-  AddContactNotifier(this._addContactUseCase) : super(AddContactState());
+  AddContactNotifier(this._addContactUseCase, this._ref)
+    : super(AddContactState());
 
   Future<void> addContact({
     required String name,
@@ -57,7 +60,11 @@ class AddContactNotifier extends StateNotifier<AddContactState> {
         isLoading: false,
         errorMessage: failure.message,
       ),
-      (_) => state = state.copyWith(isLoading: false, isSuccess: true),
+      (contact) {
+        // Instantly push new contact to the top of the list
+        _ref.read(contactsProvider.notifier).onContactAdded(contact);
+        state = state.copyWith(isLoading: false, isSuccess: true);
+      },
     );
   }
 }
@@ -66,5 +73,5 @@ final addContactProvider =
     StateNotifierProvider.autoDispose<AddContactNotifier, AddContactState>((
       ref,
     ) {
-      return AddContactNotifier(getIt<AddContactUseCase>());
+      return AddContactNotifier(getIt<AddContactUseCase>(), ref);
     });

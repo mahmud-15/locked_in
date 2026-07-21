@@ -29,4 +29,14 @@ class HomeRepositoryImpl implements HomeRepository {
       return left(CacheFailure('Failed to fetch home stats'));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> unlockApp(String appId) async {
+    try {
+      await _localDataSource.unlockApp(appId);
+      return right(null);
+    } catch (e) {
+      return left(CacheFailure('Failed to unlock app'));
+    }
+  }
 }

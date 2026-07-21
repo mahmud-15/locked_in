@@ -84,4 +84,22 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, UserEntity>> getCurrentUser() async {
     return Left(ServerFailure("Not implemented"));
   }
+
+  @override
+  Future<Either<Failure, void>> changePassword(
+    String oldPassword,
+    String newPassword,
+    String confirmPassword,
+  ) async {
+    try {
+      await _remoteDataSource.changePassword(
+        oldPassword,
+        newPassword,
+        confirmPassword,
+      );
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

@@ -8,7 +8,8 @@ class LockedAppEntity extends Equatable {
   final String lockedDuration;
   final String iconKey;
   final Uint8List? iconBytes;
-  final DateTime lockUntil;
+  final DateTime lockUntil; // Restored lockUntil
+  final String? userId; // Kept userId
 
   const LockedAppEntity({
     required this.id,
@@ -18,6 +19,7 @@ class LockedAppEntity extends Equatable {
     required this.iconKey,
     required this.lockUntil,
     this.iconBytes,
+    this.userId, // Kept userId
   });
 
   @override
@@ -29,5 +31,6 @@ class LockedAppEntity extends Equatable {
     iconKey,
     iconBytes,
     lockUntil,
+    userId, // Added userId
   ];
 }

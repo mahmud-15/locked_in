@@ -146,29 +146,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 20)),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              AppStrings.activeLocks,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.black,
+        if (state.activeLocks.isNotEmpty) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                AppStrings.activeLocks,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black,
+                ),
               ),
             ),
           ),
-        ),
-        const SliverToBoxAdapter(child: SizedBox(height: 8)),
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (_, i) => AppLockTile(item: state.activeLocks[i]),
-              childCount: state.activeLocks.length,
+          const SliverToBoxAdapter(child: SizedBox(height: 8)),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (_, i) => AppLockTile(item: state.activeLocks[i]),
+                childCount: state.activeLocks.length,
+              ),
             ),
           ),
-        ),
+        ] else
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 32),
+                  const Text(
+                    'Your digital environment is currently open. Ready to lock in and focus?',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: AppColors.gray,
+                      height: 1.6,
+                    ),
+                  ),
+                  const SizedBox(height: 48),
+                ],
+              ),
+            ),
+          ),
         const SliverToBoxAdapter(child: SizedBox(height: 20)),
       ],
     );

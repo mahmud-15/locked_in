@@ -8,6 +8,11 @@ abstract class AuthRemoteDataSource {
   Future<UserModel> verifyEmail(String email, String oneTimeCode);
   Future<void> resendOtp(String email);
   Future<UserModel> login(String email, String password);
+  Future<void> changePassword(
+    String oldPassword,
+    String newPassword,
+    String confirmPassword,
+  );
 }
 
 @LazySingleton(as: AuthRemoteDataSource)
@@ -71,6 +76,27 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     if (response.isSuccess) {
       return UserModel.fromJson(response.data['data'] ?? response.data);
     } else {
+      throw Exception(response.message);
+    }
+  }
+
+  @override
+  Future<void> changePassword(
+    String oldPassword,
+    String newPassword,
+    String confirmPassword,
+  ) async {
+    final response = await ApiService.post(
+      ApiEndpoints.changePassword,
+      body: {
+        'oldPassword': oldPassword,
+        'currentPassword': oldPassword,
+        'newPassword': newPassword,
+        'confirmPassword': confirmPassword,
+      },
+    );
+
+    if (!response.isSuccess) {
       throw Exception(response.message);
     }
   }

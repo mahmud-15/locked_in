@@ -19,6 +19,8 @@ class RouteNames {
   static const String editProfile = 'edit-profile';
   static const String changePassword = 'change-password';
   static const String subscriptionHistory = 'subscription-history';
+  static const String notifications = 'notifications';
+  static const String paymentSuccess = 'payment-success';
 }
 
 class RoutePaths {
@@ -46,4 +48,6 @@ class RoutePaths {
   static const String editProfile = '/edit-profile';
   static const String changePassword = '/change-password';
   static const String subscriptionHistory = '/subscription-history';
+  static const String notifications = '/notifications';
+  static const String paymentSuccess = '/payment-success';
 }

@@ -28,11 +28,13 @@ class LockedTimeCard extends StatelessWidget {
             children: [
               _LockIconBox(),
               const SizedBox(width: 12),
-              _StatsLabels(
-                title: AppStrings.todayLockedTime,
-                subtitle: stats.progressMessage,
+              Expanded(
+                child: _StatsLabels(
+                  title: AppStrings.todayLockedTime,
+                  subtitle: stats.progressMessage,
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               Text(
                 stats.lockedDuration,
                 style: const TextStyle(
@@ -46,7 +48,7 @@ class LockedTimeCard extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              const Icon(Icons.trending_down, color: Colors.white70, size: 16),
+              const Icon(Icons.trending_up, color: Colors.white70, size: 16),
               const SizedBox(width: 4),
               Text(
                 stats.comparisonText,

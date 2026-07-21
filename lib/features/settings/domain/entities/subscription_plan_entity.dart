@@ -8,6 +8,11 @@ class SubscriptionPlanEntity extends Equatable {
   final String tagline;
   final List<String> features;
   final bool isPopular;
+  final int? duration;
+  final String? priceId;
+  final String? paymentLink;
+  final String? productId;
+  final int? appAmount;
 
   const SubscriptionPlanEntity({
     required this.id,
@@ -17,6 +22,11 @@ class SubscriptionPlanEntity extends Equatable {
     required this.tagline,
     required this.features,
     this.isPopular = false,
+    this.duration,
+    this.priceId,
+    this.paymentLink,
+    this.productId,
+    this.appAmount,
   });
 
   @override
@@ -28,5 +38,10 @@ class SubscriptionPlanEntity extends Equatable {
     tagline,
     features,
     isPopular,
+    duration,
+    priceId,
+    paymentLink,
+    productId,
+    appAmount,
   ];
 }

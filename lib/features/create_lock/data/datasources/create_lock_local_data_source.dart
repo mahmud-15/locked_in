@@ -1,8 +1,8 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:locked_in/core/services/app_monitoring_service.dart';
 import 'package:locked_in/features/create_lock/data/models/app_to_lock_model.dart';
-
 import 'package:locked_in/features/home/data/models/locked_app_model.dart';
+import 'package:locked_in/core/network/local_storage.dart';
 
 abstract class CreateLockLocalDataSource {
   Future<List<AppToLockModel>> getAvailableApps();
@@ -17,6 +17,7 @@ class CreateLockLocalDataSourceImpl implements CreateLockLocalDataSource {
     final apps = await _monitoringService.getInstalledApps();
 
     return apps
+        .where((app) => app['packageName'] != 'com.lockedinlimited.locked_in')
         .map(
           (app) => AppToLockModel(
             id: app['packageName'] ?? '',
@@ -37,10 +38,9 @@ class CreateLockLocalDataSourceImpl implements CreateLockLocalDataSource {
     final now = DateTime.now();
     for (var entry in appDurations.entries) {
       final appId = entry.key;
-      final durationIndex = entry.value;
+      final durationInMinutes = entry.value;
 
-      final minutes = (durationIndex + 1) * 30;
-      final lockUntil = now.add(Duration(minutes: minutes));
+      final lockUntil = now.add(Duration(minutes: durationInMinutes));
 
       final appInfo = apps.firstWhere((a) => a.id == appId);
 
@@ -48,13 +48,27 @@ class CreateLockLocalDataSourceImpl implements CreateLockLocalDataSource {
         id: appInfo.id,
         name: appInfo.name,
         category: appInfo.category,
-        lockedDuration: _formatDuration(minutes),
+        lockedDuration: _formatDuration(durationInMinutes),
         iconKey: appInfo.iconKey,
         lockUntil: lockUntil,
         iconBytes: appInfo.iconBytes,
+        userId: LocalStorage.userId, // Set user ID
       );
 
       await box.put(appId, lockedModel.toJson());
+
+      // Save to lock_sessions for focus duration calculation
+      final sessionId = '${appId}_${now.millisecondsSinceEpoch}';
+      final sessionData = {
+        'id': sessionId,
+        'appId': appId,
+        'appName': appInfo.name,
+        'startTime': now.toIso8601String(),
+        'endTime': lockUntil.toIso8601String(),
+        'userId': LocalStorage.userId,
+      };
+      final sessionsBox = await Hive.openBox('lock_sessions');
+      await sessionsBox.put(sessionId, sessionData);
 
       // Update native side with timestamp
       await _monitoringService.updateAppLockUntil(

@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:locked_in/core/router/route_names.dart';
+import 'package:locked_in/features/emergency_unlock/domain/entities/emergency_unlock_args.dart';
 
 class RequestSentScreen extends StatefulWidget {
-  const RequestSentScreen({super.key});
+  final EmergencyUnlockArgs args;
+
+  const RequestSentScreen({super.key, required this.args});
 
   @override
   State<RequestSentScreen> createState() => _RequestSentScreenState();
@@ -17,9 +20,31 @@ class _RequestSentScreenState extends State<RequestSentScreen> {
     super.initState();
     Timer(const Duration(seconds: 3), () {
       if (mounted) {
-        context.pushReplacementNamed(RouteNames.requestCode);
+        context.pushReplacementNamed(
+          RouteNames.requestCode,
+          extra: widget.args,
+        );
       }
     });
+  }
+
+  Color _avatarColor(String name) {
+    const colors = [
+      Color(0xFF8B5CF6),
+      Color(0xFF2563EB),
+      Color(0xFF059669),
+      Color(0xFFD97706),
+      Color(0xFFDC2626),
+    ];
+    return colors[name.codeUnitAt(0) % colors.length];
+  }
+
+  String _initials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return parts[0][0].toUpperCase();
   }
 
   @override
@@ -94,7 +119,7 @@ class _RequestSentScreenState extends State<RequestSentScreen> {
         border: Border.all(color: const Color(0xFFF1F5F9)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withOpacity(0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -105,13 +130,13 @@ class _RequestSentScreenState extends State<RequestSentScreen> {
           Container(
             width: 52.w,
             height: 52.w,
-            decoration: const BoxDecoration(
-              color: Color(0xFF8B5CF6),
+            decoration: BoxDecoration(
+              color: _avatarColor(widget.args.contactName),
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
             child: Text(
-              'JD',
+              _initials(widget.args.contactName),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 17.sp,
@@ -124,7 +149,7 @@ class _RequestSentScreenState extends State<RequestSentScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Jane Doe',
+                widget.args.contactName,
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
@@ -179,7 +204,7 @@ class _RequestSentScreenState extends State<RequestSentScreen> {
                   "Most request are approved within a few minutes",
                   style: TextStyle(
                     fontSize: 12.sp,
-                    color: const Color(0xFFFF5247).withValues(alpha: 0.8),
+                    color: const Color(0xFFFF5247).withOpacity(0.8),
                     fontWeight: FontWeight.w400,
                   ),
                 ),

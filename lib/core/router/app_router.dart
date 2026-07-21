@@ -7,13 +7,18 @@ import 'package:locked_in/features/auth/presentation/screens/register_screen.dar
 import 'package:locked_in/features/contacts/presentation/screens/contacts_screen.dart';
 import 'package:locked_in/features/create_lock/presentation/screens/create_lock_screen.dart';
 import 'package:locked_in/features/emergency_unlock/presentation/screens/emergency_unlock_screen.dart';
+import 'package:locked_in/features/emergency_unlock/domain/entities/emergency_unlock_args.dart';
 import 'package:locked_in/features/tracking/presentation/screens/tracking_screen.dart';
 import 'package:locked_in/features/home/presentation/screens/home_screen.dart';
 import 'package:locked_in/features/settings/presentation/screens/change_password_screen.dart';
 import 'package:locked_in/features/settings/presentation/screens/edit_profile_screen.dart';
 import 'package:locked_in/features/settings/presentation/screens/settings_screen.dart';
 import 'package:locked_in/features/settings/presentation/screens/subscription_history_screen.dart';
+import 'package:locked_in/features/notifications/presentation/screens/notification_screen.dart';
+
+import 'package:locked_in/features/settings/presentation/screens/payment_success_screen.dart';
 import 'package:locked_in/features/splash/presentation/screens/splash_screen.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:locked_in/features/home/domain/entities/locked_app_entity.dart';
 import 'package:locked_in/features/home/presentation/screens/app_locked_detail_screen.dart';
@@ -61,6 +66,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           state.matchedLocation == RoutePaths.resetPassword ||
           state.matchedLocation == RoutePaths.userVerify;
 
+      final isPublicPolicyRoute =
+          state.matchedLocation == RoutePaths.termsCondition ||
+          state.matchedLocation == RoutePaths.privacyPolicy ||
+          state.matchedLocation == RoutePaths.aboutUs;
+
       // 1. Handle Splash Screen specifically
       if (isInitial) {
         return isSplashing ? null : RoutePaths.splash;
@@ -70,6 +80,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (isSplashing) {
         if (!isOnboardingCompleted) return RoutePaths.onboarding;
         if (!isAuthenticated) return RoutePaths.login;
+        if (!authState.isSubscribed) return RoutePaths.subscription;
         return RoutePaths.home;
       }
 
@@ -79,15 +90,26 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       // 3. Handle Auth Protected routes
-      if (!isAuthenticated && !isAuthRoute) {
+      if (!isAuthenticated && !isAuthRoute && !isPublicPolicyRoute) {
         return RoutePaths.login;
       }
 
-      // 4. Handle Authenticated users trying to access Auth/Onboarding routes
-      if (isAuthenticated && (isAuthRoute || isOnboarding)) {
-        return RoutePaths.home;
+      // 4. Handle Subscription Requirement
+      if (isAuthenticated && !authState.isSubscribed) {
+        // Allow user verify screen if that's where they are coming from
+        if (state.matchedLocation == RoutePaths.userVerify) return null;
+
+        return state.matchedLocation == RoutePaths.subscription
+            ? null
+            : RoutePaths.subscription;
       }
 
+      // 5. Handle Authenticated users trying to access Auth/Onboarding routes
+      if (isAuthenticated && (isAuthRoute || isOnboarding)) {
+        return authState.isSubscribed
+            ? RoutePaths.home
+            : RoutePaths.subscription;
+      }
       return null;
     },
     routes: [
@@ -184,7 +206,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: RoutePaths.emergencyUnlock,
         name: RouteNames.emergencyUnlock,
         parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const EmergencyUnlockScreen(),
+        builder: (context, state) {
+          final lockedApp = state.extra as LockedAppEntity;
+          return EmergencyUnlockScreen(lockedApp: lockedApp);
+        },
       ),
       GoRoute(
         path: RoutePaths.subscription,
@@ -205,13 +230,19 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: RoutePaths.requestSent,
         name: RouteNames.requestSent,
         parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const RequestSentScreen(),
+        builder: (context, state) {
+          final args = state.extra as EmergencyUnlockArgs;
+          return RequestSentScreen(args: args);
+        },
       ),
       GoRoute(
         path: RoutePaths.requestCode,
         name: RouteNames.requestCode,
         parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const RequestCodeScreen(),
+        builder: (context, state) {
+          final args = state.extra as EmergencyUnlockArgs;
+          return RequestCodeScreen(args: args);
+        },
       ),
       GoRoute(
         path: RoutePaths.editProfile,
@@ -230,6 +261,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: RouteNames.subscriptionHistory,
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const SubscriptionHistoryScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.paymentSuccess,
+        name: RouteNames.paymentSuccess,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const PaymentSuccessScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.notifications,
+        name: RouteNames.notifications,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const NotificationScreen(),
       ),
     ],
   );

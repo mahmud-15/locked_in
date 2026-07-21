@@ -1,54 +1,61 @@
+import 'package:locked_in/features/auth/data/models/user_model.dart';
 import 'package:locked_in/features/settings/data/models/subscription_plan_model.dart';
+import 'package:locked_in/features/settings/data/models/user_subscription_model.dart';
+import 'package:locked_in/core/constants/api_endpoints.dart';
+import 'package:locked_in/core/network/api_service.dart';
 
 abstract class SubscriptionRemoteDataSource {
   Future<List<SubscriptionPlanModel>> getPlans();
-  Future<void> subscribeToPlan(String planId);
+  Future<String> subscribeToPlan(String planId);
+  Future<List<UserSubscriptionModel>> getSubscriptionHistory();
 }
 
 class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
-  // TODO: inject Dio and call real API
   @override
   Future<List<SubscriptionPlanModel>> getPlans() async {
-    const _features = [
-      'Follow to updates',
-      'See all post',
-      'New feature unlock',
-      'See all post',
-      'Follow to updates',
-      'Follow to updates',
-    ];
+    final response = await ApiService.get(ApiEndpoints.plan);
 
-    return const [
-      SubscriptionPlanModel(
-        id: 'free',
-        name: 'Free',
-        price: '\$4.99',
-        billingCycle: '/monthly',
-        tagline: 'Follow along for public updates',
-        features: _features,
-      ),
-      SubscriptionPlanModel(
-        id: 'premium',
-        name: 'Premium',
-        price: '\$4.99',
-        billingCycle: '/monthly',
-        tagline: 'Follow along for public updates',
-        features: _features,
-        isPopular: true,
-      ),
-      SubscriptionPlanModel(
-        id: 'diamond',
-        name: 'Diamond',
-        price: '\$4.99',
-        billingCycle: '/monthly',
-        tagline: 'Follow along for public updates',
-        features: _features,
-      ),
-    ];
+    if (response.isSuccess) {
+      final List data = response.data['data'] ?? [];
+      return data
+          .map(
+            (json) =>
+                SubscriptionPlanModel.fromJson(json as Map<String, dynamic>),
+          )
+          .toList();
+    } else {
+      throw Exception(response.message);
+    }
   }
 
   @override
-  Future<void> subscribeToPlan(String planId) async {
-    // TODO: POST /subscriptions/{planId}
+  Future<String> subscribeToPlan(String planId) async {
+    final response = await ApiService.post(
+      ApiEndpoints.subscriptionStripe,
+      body: {'receipt': planId},
+    );
+
+    if (response.isSuccess) {
+      return response.data['data'] as String;
+    } else {
+      throw Exception(response.message);
+    }
+  }
+
+  @override
+  Future<List<UserSubscriptionModel>> getSubscriptionHistory() async {
+    final response = await ApiService.get(ApiEndpoints.subscriptionHistory);
+
+    if (response.isSuccess) {
+      final List data = response.data['data'] ?? [];
+      return data
+          .map(
+            (json) =>
+                UserSubscriptionModel.fromJson(json as Map<String, dynamic>),
+          )
+          .toList();
+    } else {
+      throw Exception(response.message);
+    }
   }
 }

@@ -152,8 +152,6 @@ class ApiService {
 Dio _getMyDio() {
   Dio dio = Dio();
 
-  dio.interceptors.add(apiLog());
-
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) {
@@ -178,6 +176,8 @@ Dio _getMyDio() {
       },
     ),
   );
+
+  dio.interceptors.add(apiLog());
 
   return dio;
 }

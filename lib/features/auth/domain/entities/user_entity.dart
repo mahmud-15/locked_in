@@ -10,5 +10,6 @@ class UserEntity with _$UserEntity {
     String? name,
     String? photoUrl,
     String? accessToken,
+    Map<String, dynamic>? subscription,
   }) = _UserEntity;
 }

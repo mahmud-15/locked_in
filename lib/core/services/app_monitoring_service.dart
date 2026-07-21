@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AppMonitoringService {
   static const MethodChannel _channel = MethodChannel(
-    'com.example.locked_in/monitoring',
+    'com.lockedinlimited.locked_in/monitoring',
   );
 
   /// Starts the foreground service for app monitoring
@@ -105,6 +105,26 @@ class AppMonitoringService {
     } on PlatformException catch (e) {
       print("Failed to update app lock until: ${e.message}");
       return false;
+    }
+  }
+
+  /// Fetches the list of app usage stats (duration and opens) for a specific date
+  Future<List<Map<String, dynamic>>> getAppUsageStats({
+    List<String>? trackedPackages,
+    String? date,
+  }) async {
+    try {
+      final dynamic result = await _channel.invokeMethod('getAppUsageStats', {
+        'trackedPackages': trackedPackages,
+        'date': date,
+      });
+      if (result is List) {
+        return result.map((e) => Map<String, dynamic>.from(e)).toList();
+      }
+      return [];
+    } on PlatformException catch (e) {
+      print("Failed to get app usage stats: ${e.message}");
+      return [];
     }
   }
 }

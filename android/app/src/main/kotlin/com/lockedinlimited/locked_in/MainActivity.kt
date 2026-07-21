@@ -1,4 +1,4 @@
-package com.example.locked_in
+package com.lockedinlimited.locked_in
 
 import android.content.Context
 import android.content.Intent
@@ -8,7 +8,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterActivity() {
-    private val CHANNEL = "com.example.locked_in/monitoring"
+    private val CHANNEL = "com.lockedinlimited.locked_in/monitoring"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -100,6 +100,75 @@ class MainActivity: FlutterActivity() {
                             }
                         }
                     }.start()
+                }
+                "getAppUsageStats" -> {
+                    val pm = packageManager
+                    val prefs = getSharedPreferences("app_monitoring_prefs", Context.MODE_PRIVATE)
+                    val today = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault()).format(java.util.Date())
+                    val date = call.argument<String>("date") ?: today
+                    val trackedPackages = call.argument<List<String>>("trackedPackages") ?: emptyList()
+                    
+                    val allPrefs = prefs.all
+                    val usageMap = mutableMapOf<String, MutableMap<String, Any>>()
+                    
+                    for ((key, value) in allPrefs) {
+                        if (key.startsWith("usage_$date") || key.startsWith("opens_$date")) {
+                            val parts = key.split("_")
+                            if (parts.size < 3) continue
+                            
+                            val pkg = parts.subList(2, parts.size).joinToString("_")
+                            val type = parts[0] // usage or opens
+                            
+                            // Skip our own app
+                            if (pkg == packageName) continue
+
+                            // If trackedPackages is provided, only include those
+                            if (trackedPackages.isNotEmpty() && !trackedPackages.contains(pkg)) {
+                                continue
+                            }
+                            
+                            if (!usageMap.containsKey(pkg)) {
+                                try {
+                                    val appInfo = pm.getApplicationInfo(pkg, 0)
+                                    // Skip system apps
+                                    val isSystemApp = (appInfo.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0
+                                    if (isSystemApp) continue
+
+                                    val appData = mutableMapOf<String, Any>(
+                                        "packageName" to pkg,
+                                        "appName" to pm.getApplicationLabel(appInfo).toString(),
+                                        "usageMs" to 0L,
+                                        "opens" to 0L
+                                    )
+                                    
+                                    // Load Icon - only for current day or small lists to avoid memory pressure
+                                    // For simplicity, we always load it since trackedPackages is usually small.
+                                    try {
+                                        val icon = pm.getApplicationIcon(pkg)
+                                        val bitmap = drawableToBitmap(icon)
+                                        val stream = java.io.ByteArrayOutputStream()
+                                        bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, stream)
+                                        appData["appIcon"] = stream.toByteArray()
+                                    } catch (e: Exception) {
+                                        // Ignore icon error
+                                    }
+                                    
+                                    usageMap[pkg] = appData
+                                } catch (e: Exception) {
+                                    // Skip if app not found/accessible
+                                    continue
+                                }
+                            }
+                            
+                            if (type == "usage") {
+                                usageMap[pkg]?.set("usageMs", value as Long)
+                            } else if (type == "opens") {
+                                usageMap[pkg]?.set("opens", value as Long)
+                            }
+                        }
+                    }
+                    
+                    result.success(usageMap.values.toList())
                 }
                 else -> {
                     result.notImplemented()

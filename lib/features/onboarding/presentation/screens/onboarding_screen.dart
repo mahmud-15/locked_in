@@ -22,6 +22,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -44,26 +46,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
               ),
             ),
-
           const SizedBox(width: 10),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            flex: 3,
-            child: PageView.builder(
-              controller: _pageController,
-              onPageChanged: (value) => setState(() => _currentPage = value),
-              itemCount: onboardingPages.length,
-              itemBuilder: (context, index) =>
-                  _OnboardingContent(model: onboardingPages[index]),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: (value) => setState(() => _currentPage = value),
+                itemCount: onboardingPages.length,
+                itemBuilder: (context, index) =>
+                    _OnboardingContent(model: onboardingPages[index]),
+              ),
             ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -72,7 +71,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     (index) => _buildDot(index),
                   ),
                 ),
-                const SizedBox(height: 48),
+                SizedBox(height: screenHeight * 0.08),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 24.w),
                   child: CommonButton(
@@ -84,8 +83,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         if (mounted) context.go(RoutePaths.login);
                       } else {
                         _pageController.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.fastOutSlowIn,
                         );
                       }
                     },
@@ -94,21 +93,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         : 'Continue \u2192',
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 32.h),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildDot(int index) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      margin: const EdgeInsets.only(right: 8),
-      height: 8,
-      width: _currentPage == index ? 24 : 8,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      height: 6,
+      width: _currentPage == index ? 20 : 6,
       decoration: BoxDecoration(
         color: _currentPage == index
             ? AppColors.primary
@@ -126,39 +126,65 @@ class _OnboardingContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(40),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            model.image,
-            height: 157,
-            width: 120,
-            fit: BoxFit.contain,
-          ),
-          const SizedBox(height: 48),
-          Text(
-            model.title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textPrimary,
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 32.w),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(height: screenHeight * 0.08),
+            if (model.image != null)
+              Image.asset(
+                model.image!,
+                height: screenHeight * 0.22,
+                fit: BoxFit.contain,
+              )
+            else if (model.icon != null)
+              SizedBox(
+                height: screenHeight * 0.22,
+                child: Center(
+                  child: Container(
+                    padding: EdgeInsets.all(28.w),
+                    decoration: BoxDecoration(
+                      color: (model.iconColor ?? AppColors.primary).withOpacity(0.08),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      model.icon,
+                      size: screenHeight * 0.12,
+                      color: model.iconColor ?? AppColors.primary,
+                    ),
+                  ),
+                ),
+              ),
+            SizedBox(height: screenHeight * 0.06),
+            Text(
+              model.title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 24.sp,
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.3,
+                color: AppColors.textPrimary,
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            model.description,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textSecondary,
-              height: 1.5,
+            SizedBox(height: 12.h),
+            Text(
+              model.description,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w400,
+                color: AppColors.textSecondary,
+                height: 1.5,
+              ),
             ),
-          ),
-        ],
+            SizedBox(height: screenHeight * 0.04),
+          ],
+        ),
       ),
     );
   }

@@ -36,7 +36,7 @@ class CreateLockNotifier extends StateNotifier<CreateLockState> {
   }
 
   void search(String query) {
-    final q = query.toLowerCase();
+    final q = query.toLowerCase().trim();
     final filtered = q.isEmpty
         ? state.allApps
         : state.allApps
@@ -76,7 +76,7 @@ class CreateLockNotifier extends StateNotifier<CreateLockState> {
     // Filter durations to only include selected apps
     final selectedDurations = <String, int>{};
     for (var id in state.selectedAppIds) {
-      selectedDurations[id] = state.selectedAppDurations[id] ?? 0;
+      selectedDurations[id] = state.selectedAppDurations[id] ?? 30;
     }
 
     final result = await _createLock(selectedDurations);
@@ -113,7 +113,7 @@ final _createLockUseCaseProvider = Provider(
 );
 
 final createLockProvider =
-    StateNotifierProvider<CreateLockNotifier, CreateLockState>(
+    StateNotifierProvider.autoDispose<CreateLockNotifier, CreateLockState>(
       (ref) => CreateLockNotifier(
         getApps: ref.read(_getAvailableAppsProvider),
         createLock: ref.read(_createLockUseCaseProvider),

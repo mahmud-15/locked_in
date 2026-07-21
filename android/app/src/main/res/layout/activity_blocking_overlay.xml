@@ -1,13 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FE5A4E">
+    android:background="#FFFFFF">
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="32dp"
         android:gravity="center"
         android:orientation="vertical"
         android:padding="32dp"
@@ -17,43 +17,42 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="160dp"
+            android:layout_height="160dp"
             android:layout_marginBottom="32dp"
-            android:src="@drawable/ic_secure_lock"
-            app:tint="#FFFFFF" />
+            android:src="@drawable/ic_screen_lock" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:text="LOCKED IN"
-            android:textColor="#FFFFFF"
-            android:textSize="28sp"
-            android:letterSpacing="0.05"
+            android:layout_marginBottom="12dp"
+            android:text="locked in 🔒."
+            android:textColor="#373737"
+            android:textSize="26sp"
+            android:letterSpacing="0.02"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/blocked_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="40dp"
-            android:lineSpacingExtra="6dp"
+            android:layout_marginBottom="48dp"
             android:gravity="center"
-            android:text="This app is temporarily blocked. Stay focused on your goals!"
-            android:textAlignment="center"
-            android:textColor="#FBE8E6"
-            android:textSize="18sp" />
+            android:lineSpacingExtra="4dp"
+            android:text="This app is temporarily locked. Stay focused on your goals!"
+            android:textColor="#676E79"
+            android:textSize="17sp" />
 
-        <androidx.appcompat.widget.AppCompatButton
+        <Button
             android:id="@+id/ok_button"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:background="@drawable/rounded_button_inverted"
+            android:layout_marginHorizontal="24dp"
+            android:background="@drawable/rounded_button"
             android:gravity="center"
-            android:text="BACK TO PRODUCTIVITY"
+            android:text="GOT IT"
             android:textAllCaps="false"
-            android:textColor="#FE5A4E"
+            android:textColor="#FFFFFF"
             android:textSize="16sp"
             android:textStyle="bold" />
 

@@ -9,26 +9,42 @@ class SubscriptionPlanModel extends SubscriptionPlanEntity {
     required super.tagline,
     required super.features,
     super.isPopular,
+    super.duration,
+    super.priceId,
+    super.paymentLink,
+    super.productId,
+    super.appAmount,
   });
 
-  factory SubscriptionPlanModel.fromJson(Map<String, dynamic> json) =>
-      SubscriptionPlanModel(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        price: json['price'] as String,
-        billingCycle: json['billing_cycle'] as String,
-        tagline: json['tagline'] as String,
-        features: List<String>.from(json['features'] as List),
-        isPopular: json['is_popular'] as bool? ?? false,
-      );
+  factory SubscriptionPlanModel.fromJson(Map<String, dynamic> json) {
+    return SubscriptionPlanModel(
+      id: json['_id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      price: '\$${json['price']}',
+      billingCycle: '/${json['category'] ?? ''}',
+      tagline: json['subtitle'] as String? ?? '',
+      features:
+          (json['features'] as List?)?.map((e) => e as String).toList() ?? [],
+      isPopular: json['name'] == 'Pro Plan', // Example logic
+      duration: json['duration'] as int?,
+      priceId: json['priceId'] as String?,
+      paymentLink: json['paymentLink'] as String?,
+      productId: json['productId'] as String?,
+      appAmount: json['app_amount'] as int?,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
+    '_id': id,
     'name': name,
-    'price': price,
-    'billing_cycle': billingCycle,
-    'tagline': tagline,
+    'price': price.replaceAll('\$', ''),
+    'category': billingCycle.replaceAll('/', ''),
+    'subtitle': tagline,
     'features': features,
-    'is_popular': isPopular,
+    'duration': duration,
+    'priceId': priceId,
+    'paymentLink': paymentLink,
+    'productId': productId,
+    'app_amount': appAmount,
   };
 }

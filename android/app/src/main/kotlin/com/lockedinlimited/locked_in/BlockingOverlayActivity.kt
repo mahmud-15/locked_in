@@ -1,15 +1,29 @@
-package com.example.locked_in
+package com.lockedinlimited.locked_in
 
-import android.app.Activity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import android.content.Intent
+import androidx.appcompat.app.AppCompatActivity
 
-class BlockingOverlayActivity : Activity() {
+class BlockingOverlayActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Ensure overlay appears immediately on top of any running app
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+        } else {
+            @Suppress("DEPRECATION")
+            window.addFlags(
+                android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            )
+        }
+
         setContentView(R.layout.activity_blocking_overlay)
 
         val packageName = intent.getStringExtra("blocked_package") ?: ""
@@ -29,7 +43,6 @@ class BlockingOverlayActivity : Activity() {
         messageTextView.text = "You've temporarily locked '$appName' to stay focused on your goals."
 
         findViewById<Button>(R.id.ok_button).setOnClickListener {
-
             goToHomeScreen()
         }
     }
@@ -42,6 +55,7 @@ class BlockingOverlayActivity : Activity() {
         finish()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         goToHomeScreen()
     }

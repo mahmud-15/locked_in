@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:locked_in/core/services/injection.dart';
 import 'package:locked_in/features/auth/domain/usecases/login_usecase.dart';
+import 'package:locked_in/features/settings/data/datasources/profile_remote_data_source.dart';
 import 'package:locked_in/features/auth/presentation/providers/auth_provider.dart';
 
 class LoginState {
@@ -47,13 +48,30 @@ class LoginNotifier extends StateNotifier<LoginState> {
       (failure) {
         state = state.copyWith(isLoading: false, errorMessage: failure.message);
       },
-      (user) {
-        _ref.read(authProvider.notifier).login();
-        state = state.copyWith(
-          isLoading: false,
-          isSuccess: true,
-          errorMessage: null,
-        );
+      (user) async {
+        try {
+          // After auth success, fetch profile to check subscription
+          final profileDataSource = _ref.read(profileRemoteDataSourceProvider);
+          final userProfile = await profileDataSource.getProfile();
+
+          final isSubscribed = userProfile.subscription != null;
+
+          _ref.read(authProvider.notifier).login(isSubscribed: isSubscribed);
+
+          state = state.copyWith(
+            isLoading: false,
+            isSuccess: true,
+            errorMessage: null,
+          );
+        } catch (e) {
+          // If profile fetch fails, still login but assume not subscribed or show error
+          _ref.read(authProvider.notifier).login(isSubscribed: false);
+          state = state.copyWith(
+            isLoading: false,
+            isSuccess: true,
+            errorMessage: null,
+          );
+        }
       },
     );
   }

@@ -1,147 +1,201 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
+import 'package:locked_in/core/constants/app_colors.dart';
+import 'package:locked_in/features/auth/domain/entities/user_entity.dart';
+import 'package:locked_in/features/settings/domain/entities/user_subscription_entity.dart';
+import 'package:locked_in/features/settings/presentation/providers/subscription_history_notifier.dart';
 
-class SubscriptionHistoryScreen extends StatelessWidget {
+class SubscriptionHistoryScreen extends ConsumerWidget {
   const SubscriptionHistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(subscriptionHistoryProvider);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        surfaceTintColor: Colors.transparent,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF373737)),
-          onPressed: () => Navigator.pop(context),
+        title: const Text(
+          'Subscription History',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        toolbarHeight: 70.h,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: _buildBody(context, ref, state),
+    );
+  }
+
+  Widget _buildBody(
+    BuildContext context,
+    WidgetRef ref,
+    SubscriptionHistoryState state,
+  ) {
+    if (state.status == HistoryStatus.loading ||
+        state.status == HistoryStatus.initial) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
+    }
+
+    if (state.status == HistoryStatus.failure) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'Subscriptions History',
-              style: TextStyle(
-                color: const Color(0xFF373737),
-                fontSize: 18.sp,
-                fontWeight: FontWeight.bold,
-              ),
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(state.errorMessage ?? 'Failed to load history'),
+            TextButton(
+              onPressed: () =>
+                  ref.read(subscriptionHistoryProvider.notifier).loadHistory(),
+              child: const Text('Retry'),
             ),
+          ],
+        ),
+      );
+    }
+
+    if (state.history.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.history_rounded,
+              size: 80.w,
+              color: AppColors.gray.withOpacity(0.3),
+            ),
+            SizedBox(height: 16.h),
             Text(
-              'View your transaction history',
+              'No history found',
               style: TextStyle(
-                color: const Color(0xFF676E79),
-                fontSize: 12.sp,
-                fontWeight: FontWeight.normal,
+                fontSize: 18.sp,
+                color: AppColors.gray,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
         ),
-      ),
-      body: ListView.builder(
-        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
-        itemCount: 8,
-        itemBuilder: (context, index) {
-          final isActive = index < 3;
-          return _SubscriptionItem(isActive: isActive);
-        },
-      ),
+      );
+    }
+
+    return ListView.builder(
+      padding: EdgeInsets.all(16.w),
+      itemCount: state.history.length,
+      itemBuilder: (context, index) {
+        final item = state.history[index];
+        return _SubscriptionHistoryCard(item: item);
+      },
     );
   }
 }
 
-class _SubscriptionItem extends StatelessWidget {
-  final bool isActive;
-  const _SubscriptionItem({required this.isActive});
+class _SubscriptionHistoryCard extends StatelessWidget {
+  final UserSubscriptionEntity item;
+
+  const _SubscriptionHistoryCard({required this.item});
 
   @override
   Widget build(BuildContext context) {
+    final isActive = item.status?.toLowerCase() == 'active';
+    final statusColor = isActive ? Colors.green : Colors.grey;
+    final startDate = item.startDate != null
+        ? DateTime.parse(item.startDate!)
+        : null;
+    final endDate = item.endDate != null ? DateTime.parse(item.endDate!) : null;
+    final formatter = DateFormat('MMM dd, yyyy');
+
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(color: Colors.black.withOpacity(0.05)),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 44.w,
-            height: 44.w,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFEF2F1),
-              shape: BoxShape.circle,
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.workspace_premium_rounded,
-                color: Color(0xFFFF9F43),
-                size: 24,
-              ),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Premium Subscription',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF373737),
-                  ),
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  'Purchased on Oct 12, 2024',
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    color: const Color(0xFF94A3B8),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '\$49.00',
+                item.name ?? 'Subscription',
                 style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF373737),
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.black,
                 ),
               ),
-              SizedBox(height: 4.h),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                 decoration: BoxDecoration(
-                  color: isActive
-                      ? const Color(0xFFEEF9F1)
-                      : const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(100.r),
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Text(
-                  isActive ? 'Active' : 'Expired',
+                  item.status?.toUpperCase() ?? 'UNKNOWN',
                   style: TextStyle(
                     fontSize: 10.sp,
-                    fontWeight: FontWeight.w600,
-                    color: isActive
-                        ? const Color(0xFF22C55E)
-                        : const Color(0xFF94A3B8),
+                    fontWeight: FontWeight.w900,
+                    color: statusColor,
+                    letterSpacing: 0.5,
                   ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Row(
+            children: [
+              Text(
+                '\$${item.price?.toStringAsFixed(2) ?? '0.00'}',
+                style: TextStyle(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.primary,
+                ),
+              ),
+              const Spacer(),
+              const Icon(
+                Icons.calendar_today_outlined,
+                size: 14,
+                color: AppColors.gray,
+              ),
+              SizedBox(width: 4.w),
+              Text(
+                startDate != null ? formatter.format(startDate) : '---',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: AppColors.gray,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.w),
+                child: const Text(
+                  'to',
+                  style: TextStyle(color: AppColors.gray, fontSize: 10),
+                ),
+              ),
+              Text(
+                endDate != null ? formatter.format(endDate) : '---',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: AppColors.gray,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],

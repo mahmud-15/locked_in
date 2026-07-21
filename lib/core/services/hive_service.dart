@@ -7,17 +7,21 @@ class HiveService {
     await Hive.initFlutter();
   }
 
-  Future<Box<T>> openBox<T>(String name) async {
-    return await Hive.openBox<T>(name);
+  Future<Box> openBox(String name) async {
+    return await Hive.openBox(name);
   }
 
   Future<void> put<T>(String boxName, String key, T value) async {
-    final box = await openBox<T>(boxName);
+    final box = await openBox(boxName);
     await box.put(key, value);
   }
 
   Future<T?> get<T>(String boxName, String key) async {
-    final box = await openBox<T>(boxName);
-    return box.get(key);
+    final box = await openBox(boxName);
+    final value = box.get(key);
+    if (value is T) {
+      return value;
+    }
+    return value as T?;
   }
 }

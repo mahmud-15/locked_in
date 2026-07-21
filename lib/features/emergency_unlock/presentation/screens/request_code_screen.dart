@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:locked_in/core/utils/snackbar_utils.dart';
+import 'package:locked_in/features/emergency_unlock/domain/entities/emergency_unlock_args.dart';
+import 'package:locked_in/features/emergency_unlock/presentation/providers/verify_otp_provider.dart';
+import 'package:locked_in/features/home/presentation/providers/home_notifier.dart';
 
-class RequestCodeScreen extends StatefulWidget {
-  const RequestCodeScreen({super.key});
+class RequestCodeScreen extends ConsumerStatefulWidget {
+  final EmergencyUnlockArgs args;
+
+  const RequestCodeScreen({super.key, required this.args});
 
   @override
-  State<RequestCodeScreen> createState() => _RequestCodeScreenState();
+  ConsumerState<RequestCodeScreen> createState() => _RequestCodeScreenState();
 }
 
-class _RequestCodeScreenState extends State<RequestCodeScreen> {
+class _RequestCodeScreenState extends ConsumerState<RequestCodeScreen> {
   final List<TextEditingController> _controllers = List.generate(
     4,
     (_) => TextEditingController(),
@@ -26,8 +33,48 @@ class _RequestCodeScreenState extends State<RequestCodeScreen> {
     super.dispose();
   }
 
+  String get _otpCode => _controllers.map((c) => c.text).join();
+
+  bool get _isCodeComplete => _otpCode.length == 4;
+
+  void _submitOtp() {
+    if (!_isCodeComplete) return;
+
+    final otp = int.tryParse(_otpCode);
+    if (otp == null) {
+      AppSnackBar.showError(context, 'Please enter a valid numeric code');
+      return;
+    }
+
+    ref
+        .read(verifyOtpProvider.notifier)
+        .verifyOtp(
+          appName: widget.args.appName,
+          contactId: widget.args.contactId,
+          otp: otp,
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final otpState = ref.watch(verifyOtpProvider);
+
+    ref.listen(verifyOtpProvider, (previous, next) {
+      if (next.errorMessage != null &&
+          next.errorMessage != previous?.errorMessage) {
+        AppSnackBar.showError(context, next.errorMessage!);
+      } else if (next.isSuccess) {
+        // Unlock the app and refresh home screen
+        ref.read(homeProvider.notifier).unlockApp(widget.args.appId);
+
+        AppSnackBar.showSuccess(
+          context,
+          next.successMessage ?? 'App unlocked successfully!',
+        );
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
+    });
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -64,7 +111,7 @@ class _RequestCodeScreenState extends State<RequestCodeScreen> {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Text(
-                  'Enter the unlock code provided by your trusted contact',
+                  'Enter the unlock code provided by ${widget.args.contactName}',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14.sp,
@@ -89,7 +136,7 @@ class _RequestCodeScreenState extends State<RequestCodeScreen> {
                 children: List.generate(4, (index) => _buildCodeField(index)),
               ),
               const Spacer(flex: 3),
-              _buildConfirmButton(),
+              _buildConfirmButton(otpState),
               SizedBox(height: 40.h),
             ],
           ),
@@ -132,31 +179,44 @@ class _RequestCodeScreenState extends State<RequestCodeScreen> {
           } else if (value.isEmpty && index > 0) {
             _focusNodes[index - 1].requestFocus();
           }
+          setState(() {}); // refresh button state
         },
       ),
     );
   }
 
-  Widget _buildConfirmButton() {
+  Widget _buildConfirmButton(VerifyOtpState otpState) {
+    final canSubmit = _isCodeComplete && !otpState.isLoading;
     return SizedBox(
       width: double.infinity,
       height: 56.h,
       child: ElevatedButton(
-        onPressed: () {
-          Navigator.of(context).popUntil((route) => route.isFirst);
-        },
+        onPressed: canSubmit ? _submitOtp : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFFF5247),
+          disabledBackgroundColor: otpState.isLoading
+              ? const Color(0xFFFF5247)
+              : const Color(0xFFFF5247).withOpacity(0.4),
           foregroundColor: Colors.white,
+          disabledForegroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.r),
           ),
         ),
-        child: Text(
-          'Confirm',
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
-        ),
+        child: otpState.isLoading
+            ? SizedBox(
+                height: 20.h,
+                width: 20.h,
+                child: const CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            : Text(
+                'Confirm',
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+              ),
       ),
     );
   }

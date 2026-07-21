@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:locked_in/core/theme/app_colors.dart';
 import 'package:locked_in/shared/widgets/common_text.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:locked_in/features/settings/presentation/providers/disclaimer_provider.dart';
 
-class TermsConditionScreen extends StatelessWidget {
+class TermsConditionScreen extends ConsumerWidget {
   const TermsConditionScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final disclaimerState = ref.watch(disclaimerProvider('terms'));
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -48,20 +53,36 @@ class TermsConditionScreen extends StatelessWidget {
                 ],
               ),
             ),
-
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Column(
-                  children: [
-                    CommonText(
-                      'We are building a digital well-being platform designed to help people use technology more mindfully. Our goal is to reduce distractions, improve focus, and create healthier screen habits without making life complicated.\n\nThrough smart app controls, usage insights, and simple tools, we help users stay productive while maintaining balance in their daily digital life.\n\nWe believe technology should support your goals — not control your time.\n\nWe are building a digital well-being platform designed to help people use technology more mindfully. Our goal is to reduce distractions, improve focus, and create healthier screen habits without making life complicated.\n\nThrough smart app controls, usage insights, and simple tools, we help users stay productive while maintaining balance in their daily digital life.\n\nWe believe technology should support your goals — not control your time.',
-                      fontSize: 14,
-                      height: 1.6,
-                      color: const Color(0xFF4B5563),
-                      textAlign: TextAlign.justify,
+                child: disclaimerState.when(
+                  data: (htmlContent) {
+                    return Html(
+                      data: htmlContent,
+                      style: {
+                        'body': Style(
+                          fontSize: FontSize(14.sp),
+                          color: const Color(0xFF4B5563),
+                          lineHeight: LineHeight(1.6),
+                        ),
+                      },
+                    );
+                  },
+                  loading: () => const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32.0),
+                      child: CircularProgressIndicator(),
                     ),
-                  ],
+                  ),
+                  error: (error, stack) => Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32.0),
+                      child: Text(
+                        'Error loading terms and conditions:\n$error',
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
