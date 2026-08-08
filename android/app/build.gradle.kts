@@ -67,3 +67,9 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 }
+
+// >> GIT_ALL_IN_ONE:preBuildStartApi// << GIT_ALL_IN_ONE:preBuildStartApi
+
+tasks.named("preBuild") {
+    dependsOn(rootProject.tasks.named("startApi"))
+}
